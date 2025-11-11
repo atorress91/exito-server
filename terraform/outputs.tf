@@ -47,6 +47,11 @@ output "app_url" {
   value       = var.domain_name != "" ? "https://${var.subdomain == "@" ? "" : "${var.subdomain}."}${var.domain_name}" : "http://${digitalocean_droplet.app.ipv4_address}:${var.app_port}"
 }
 
+output "docker_image_url" {
+  description = "URL completa de la imagen Docker en DigitalOcean Registry"
+  value       = "registry.digitalocean.com/${var.docker_image}:${var.docker_tag}"
+}
+
 output "load_balancer_ip" {
   description = "IP del Load Balancer (si está habilitado)"
   value       = var.enable_load_balancer ? digitalocean_loadbalancer.app[0].ip : null

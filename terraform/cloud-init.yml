@@ -12,6 +12,8 @@ packages:
   - git
   - curl
   - htop
+  - jq
+  - wget
 
 # Configurar Docker
 runcmd:
@@ -19,30 +21,73 @@ runcmd:
   - systemctl start docker
   - systemctl enable docker
 
-  # Pull de la imagen Docker
-  - docker pull ${docker_image}:${docker_tag}
+  # Instalar doctl (CLI de DigitalOcean) para autenticación con registry
+  - cd /tmp
+  - wget -q https://github.com/digitalocean/doctl/releases/download/v1.104.0/doctl-1.104.0-linux-amd64.tar.gz
+  - tar xf doctl-1.104.0-linux-amd64.tar.gz
+  - mv doctl /usr/local/bin/
+  - chmod +x /usr/local/bin/doctl
 
-  # Detener y eliminar contenedor existente si existe
-  - docker stop exitojuntos-app || true
-  - docker rm exitojuntos-app || true
+  # Autenticar con DigitalOcean Container Registry
+  - export DIGITALOCEAN_ACCESS_TOKEN="${do_token}"
+  - /usr/local/bin/doctl auth init -t $DIGITALOCEAN_ACCESS_TOKEN
+  - /usr/local/bin/doctl registry login
 
-  # Ejecutar el contenedor
+  # Crear directorio para la aplicación
+  - mkdir -p /opt/exitojuntos
+  - cd /opt/exitojuntos
+
+  # Crear archivo docker-compose.yml
   - |
-    docker run -d \
-      --name exitojuntos-app \
-      --restart unless-stopped \
-      -p ${app_port}:${app_port} \
-      -e NODE_ENV=${node_env} \
-      -e PORT=${app_port} \
-      -e DATABASE_URL="${database_url}" \
-      -e JWT_SECRET="${jwt_secret}" \
-      -e JWT_EXPIRES_IN="${jwt_expires_in}" \
-      ${docker_image}:${docker_tag}
+    cat > /opt/exitojuntos/docker-compose.yml << 'EOF'
+    version: '3.8'
 
-  # Limpiar imágenes antiguas
-  - docker image prune -af
+    services:
+      app:
+        image: registry.digitalocean.com/${docker_image}:${docker_tag}
+        container_name: exitojuntos-app
+        restart: unless-stopped
+        ports:
+          - "${app_port}:${app_port}"
+        environment:
+          - NODE_ENV=${node_env}
+          - PORT=${app_port}
+          - DATABASE_URL=${database_url}
+          - JWT_SECRET=${jwt_secret}
+          - JWT_EXPIRES_IN=${jwt_expires_in}
+        networks:
+          - app-network
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "10m"
+            max-file: "3"
+        deploy:
+          resources:
+            limits:
+              cpus: '1.0'
+              memory: 1.5G
+            reservations:
+              cpus: '0.5'
+              memory: 512M
 
-# Configurar firewall UFW (opcional, adicional al firewall de DO)
+    networks:
+      app-network:
+        driver: bridge
+    EOF
+
+  # Pull de la imagen desde DigitalOcean Registry
+  - cd /opt/exitojuntos
+  - docker-compose pull
+
+  # Iniciar la aplicación
+  - docker-compose up -d
+
+  # Verificar logs iniciales
+  - sleep 10
+  - docker-compose logs --tail=50
+
+# Configurar archivos del sistema
 write_files:
   - path: /etc/docker/daemon.json
     content: |
@@ -53,6 +98,57 @@ write_files:
           "max-file": "3"
         }
       }
+    permissions: '0644'
+
+  - path: /etc/systemd/system/exitojuntos.service
+    content: |
+      [Unit]
+      Description=Exitojuntos Application
+      Requires=docker.service
+      After=docker.service
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      WorkingDirectory=/opt/exitojuntos
+      ExecStartPre=/usr/local/bin/doctl registry login
+      ExecStart=/usr/bin/docker-compose up -d
+      ExecStop=/usr/bin/docker-compose down
+      TimeoutStartSec=0
+      Environment="DIGITALOCEAN_ACCESS_TOKEN=${do_token}"
+
+      [Install]
+      WantedBy=multi-user.target
+    permissions: '0644'
+
+  - path: /usr/local/bin/do-registry-login
+    content: |
+      #!/bin/bash
+      export DIGITALOCEAN_ACCESS_TOKEN="${do_token}"
+      /usr/local/bin/doctl auth init -t $DIGITALOCEAN_ACCESS_TOKEN
+      /usr/local/bin/doctl registry login
+    permissions: '0755'
+
+  - path: /etc/cron.daily/docker-registry-refresh
+    content: |
+      #!/bin/bash
+      /usr/local/bin/do-registry-login
+    permissions: '0755'
 
 # Mensaje final
-final_message: 'Sistema configurado y aplicación desplegada exitosamente'
+final_message: |
+  ========================================
+  Exitojuntos Server Setup Complete!
+  ========================================
+
+  Container Registry: registry.digitalocean.com/${docker_image}
+  Application running on port ${app_port}
+
+  Useful commands:
+  - Check status: cd /opt/exitojuntos && docker-compose ps
+  - View logs: cd /opt/exitojuntos && docker-compose logs -f
+  - Restart: cd /opt/exitojuntos && docker-compose restart
+  - Update: cd /opt/exitojuntos && docker-compose pull && docker-compose up -d
+  - Registry login: doctl registry login
+
+  ========================================

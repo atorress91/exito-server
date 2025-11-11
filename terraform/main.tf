@@ -28,6 +28,7 @@ resource "digitalocean_droplet" "app" {
   ssh_keys = [digitalocean_ssh_key.default.id]
 
   user_data = templatefile("${path.module}/cloud-init.yml", {
+    do_token       = var.do_token
     docker_image   = var.docker_image
     docker_tag     = var.docker_tag
     app_port       = var.app_port
