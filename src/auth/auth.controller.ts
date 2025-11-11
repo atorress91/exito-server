@@ -95,7 +95,7 @@ export class AuthController {
     status: 401,
     description: 'No autorizado',
   })
-  async getProfile(@Request() req) {
+  getProfile(@Request() req) {
     return req.user;
   }
 }

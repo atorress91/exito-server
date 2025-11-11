@@ -1,42 +1,47 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { LoginDto, RegisterDto } from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  // En una aplicación real, usarías un repositorio para interactuar con la base de datos
-  private users: Array<{
-    id: string;
-    name: string;
-    email: string;
-    password: string;
-  }> = [];
-
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
     const { name, email, password } = registerDto;
 
     // Verificar si el usuario ya existe
-    const existingUser = this.users.find((user) => user.email === email);
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
+
     if (existingUser) {
-      throw new UnauthorizedException('El usuario ya existe');
+      throw new ConflictException('El usuario ya existe');
     }
 
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Crear nuevo usuario
-    const newUser = {
-      id: Date.now().toString(),
+    const newUser = this.userRepository.create({
       name,
       email,
       password: hashedPassword,
-    };
+    });
 
-    this.users.push(newUser);
+    await this.userRepository.save(newUser);
 
     // Generar token JWT
     const payload: JwtPayload = { sub: newUser.id, email: newUser.email };
@@ -56,7 +61,7 @@ export class AuthService {
     const { email, password } = loginDto;
 
     // Buscar usuario
-    const user = this.users.find((u) => u.email === email);
+    const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -81,8 +86,8 @@ export class AuthService {
     };
   }
 
-  validateUser(userId: string) {
-    const user = this.users.find((u) => u.id === userId);
+  async validateUser(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
