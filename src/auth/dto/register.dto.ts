@@ -5,16 +5,27 @@ import {
   IsString,
   MinLength,
   Matches,
+  IsOptional,
+  IsDateString,
+  IsNumber,
 } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({
-    example: 'John Doe',
-    description: 'El nombre completo del usuario',
+    example: 'John',
+    description: 'El nombre del usuario',
   })
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiProperty({
+    example: 'Doe',
+    description: 'El apellido del usuario',
+  })
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
 
   @ApiProperty({
     example: 'user@example.com',
@@ -44,4 +55,76 @@ export class RegisterDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @ApiProperty({
+    example: '1234567890',
+    description: 'Número de identificación del usuario',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  identification?: string;
+
+  @ApiProperty({
+    example: 'Calle 123 #45-67',
+    description: 'Dirección del usuario',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @ApiProperty({
+    example: 'Bogotá',
+    description: 'Ciudad del usuario',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @ApiProperty({
+    example: 'Cundinamarca',
+    description: 'Estado/Departamento del usuario',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  state?: string;
+
+  @ApiProperty({
+    example: '110111',
+    description: 'Código postal del usuario',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  zipCode?: string;
+
+  @ApiProperty({
+    example: 'https://example.com/profile.jpg',
+    description: 'URL de la imagen de perfil',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  imageProfileUrl?: string;
+
+  @ApiProperty({
+    example: '1990-01-15',
+    description: 'Fecha de nacimiento del usuario (formato ISO 8601)',
+    required: false,
+  })
+  @IsDateString()
+  @IsOptional()
+  birtDate?: Date;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID del usuario padre/referente',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  father?: number;
 }

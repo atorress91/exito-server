@@ -20,7 +20,21 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
-    const { name, email, phone, password } = registerDto;
+    const {
+      name,
+      lastName,
+      email,
+      phone,
+      password,
+      identification,
+      address,
+      city,
+      state,
+      zipCode,
+      imageProfileUrl,
+      birtDate,
+      father,
+    } = registerDto;
 
     // Verificar si el usuario ya existe por teléfono
     const existingUserByPhone = await this.userRepository.findOne({
@@ -46,9 +60,18 @@ export class AuthService {
     // Crear nuevo usuario
     const newUser = this.userRepository.create({
       name,
+      lastName,
       email,
       phone,
       password: hashedPassword,
+      identification,
+      address,
+      city,
+      state,
+      zipCode,
+      imageProfileUrl,
+      birtDate,
+      father,
     });
 
     await this.userRepository.save(newUser);
