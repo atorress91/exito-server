@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto, RegisterDto, PaginationDto } from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
 import { User } from './entities/user.entity';
 
@@ -137,6 +137,47 @@ export class AuthService {
       id: user.id.toString(),
       name: user.name,
       phone: user.phone,
+    };
+  }
+
+  async findAll(paginationDto: PaginationDto) {
+    const { page = 1, limit = 10 } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await this.userRepository.findAndCount({
+      select: [
+        'id',
+        'name',
+        'lastName',
+        'email',
+        'phone',
+        'identification',
+        'address',
+        'city',
+        'state',
+        'zipCode',
+        'imageProfileUrl',
+        'birtDate',
+        'father',
+        'createdAt',
+        'updatedAt',
+      ],
+      relations: ['role'],
+      skip,
+      take: limit,
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 }

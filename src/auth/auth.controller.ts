@@ -6,6 +6,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,9 +14,10 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto, RegisterDto, PaginationDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 
@@ -97,5 +99,68 @@ export class AuthController {
   })
   getProfile(@GetUser() user: { id: string; name: string; phone: string }) {
     return user;
+  }
+
+  @Get('users')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener todos los usuarios con paginación' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Cantidad de registros por página',
+    example: 10,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de usuarios obtenida exitosamente',
+    schema: {
+      example: {
+        data: [
+          {
+            id: 1,
+            name: 'John',
+            lastName: 'Doe',
+            email: 'john@example.com',
+            phone: '+573001234567',
+            identification: '1234567890',
+            address: 'Calle 123 #45-67',
+            city: 'Bogotá',
+            state: 'Cundinamarca',
+            zipCode: '110111',
+            imageProfileUrl: 'https://example.com/profile.jpg',
+            birtDate: '1990-01-15T00:00:00.000Z',
+            father: null,
+            createdAt: '2025-11-11T00:00:00.000Z',
+            updatedAt: '2025-11-11T00:00:00.000Z',
+            role: {
+              id: 1,
+              name: 'Admin',
+            },
+          },
+        ],
+        meta: {
+          total: 100,
+          page: 1,
+          limit: 10,
+          totalPages: 10,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado',
+  })
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.authService.findAll(paginationDto);
   }
 }
