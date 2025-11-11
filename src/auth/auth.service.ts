@@ -10,12 +10,15 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto, RegisterDto, PaginationDto } from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
 import { User } from './entities/user.entity';
+import { Role } from './entities/role.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -34,6 +37,7 @@ export class AuthService {
       imageProfileUrl,
       birtDate,
       father,
+      roleId,
     } = registerDto;
 
     // Verificar si el usuario ya existe por teléfono
@@ -54,6 +58,15 @@ export class AuthService {
       throw new ConflictException('El correo electrónico ya está registrado');
     }
 
+    // Verificar que el rol existe
+    const role = await this.roleRepository.findOne({
+      where: { id: roleId },
+    });
+
+    if (!role) {
+      throw new ConflictException('El rol especificado no existe');
+    }
+
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -72,6 +85,7 @@ export class AuthService {
       imageProfileUrl,
       birtDate,
       father,
+      role,
     });
 
     await this.userRepository.save(newUser);

@@ -127,4 +127,12 @@ export class RegisterDto {
   @IsNumber()
   @IsOptional()
   father?: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID del rol del usuario',
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  roleId: number;
 }
