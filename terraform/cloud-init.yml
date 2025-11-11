@@ -1,0 +1,58 @@
+#cloud-config
+
+# Configuración de cloud-init para DigitalOcean
+
+# Actualizar paquetes
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose
+  - git
+  - curl
+  - htop
+
+# Configurar Docker
+runcmd:
+  # Iniciar Docker
+  - systemctl start docker
+  - systemctl enable docker
+
+  # Pull de la imagen Docker
+  - docker pull ${docker_image}:${docker_tag}
+
+  # Detener y eliminar contenedor existente si existe
+  - docker stop exitojuntos-app || true
+  - docker rm exitojuntos-app || true
+
+  # Ejecutar el contenedor
+  - |
+    docker run -d \
+      --name exitojuntos-app \
+      --restart unless-stopped \
+      -p ${app_port}:${app_port} \
+      -e NODE_ENV=${node_env} \
+      -e PORT=${app_port} \
+      -e DATABASE_URL="${database_url}" \
+      -e JWT_SECRET="${jwt_secret}" \
+      -e JWT_EXPIRES_IN="${jwt_expires_in}" \
+      ${docker_image}:${docker_tag}
+
+  # Limpiar imágenes antiguas
+  - docker image prune -af
+
+# Configurar firewall UFW (opcional, adicional al firewall de DO)
+write_files:
+  - path: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      }
+
+# Mensaje final
+final_message: 'Sistema configurado y aplicación desplegada exitosamente'

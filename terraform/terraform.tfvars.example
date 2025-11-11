@@ -1,0 +1,42 @@
+# Copia este archivo a terraform.tfvars y completa con tus valores
+
+# REQUERIDO: Token de DigitalOcean (obtener en: https://cloud.digitalocean.com/account/api/tokens)
+do_token = "tu-token-de-digitalocean-aqui"
+
+# REQUERIDO: Clave SSH pública (ejecuta: cat ~/.ssh/id_rsa.pub)
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... tu-clave-publica"
+
+# REQUERIDO: Secret para JWT (genera uno seguro)
+jwt_secret = "tu-jwt-secret-muy-seguro-aqui"
+
+# Configuración del proyecto
+project_name = "exitojuntos"
+environment  = "production"
+
+# Configuración del servidor
+region       = "nyc3"  # nyc1, nyc3, sfo3, ams3, sgp1, lon1, fra1, tor1, blr1, syd1
+droplet_size = "s-1vcpu-2gb"  # s-1vcpu-1gb, s-1vcpu-2gb, s-2vcpu-2gb, s-2vcpu-4gb
+
+# Configuración de Docker
+docker_image = "exitojuntos-server"
+docker_tag   = "latest"
+
+# Configuración de la aplicación
+app_port       = "3000"
+node_env       = "production"
+jwt_expires_in = "1d"
+
+# Configuración de base de datos
+postgres_version     = "16"
+database_size        = "db-s-1vcpu-1gb"  # db-s-1vcpu-1gb, db-s-1vcpu-2gb, db-s-2vcpu-4gb
+database_node_count  = 1
+
+# Seguridad SSH (recomendado: especificar tu IP pública)
+allowed_ssh_ips = ["0.0.0.0/0"]  # Cambia esto por tu IP para mayor seguridad
+
+# Load Balancer (opcional, para alta disponibilidad)
+enable_load_balancer = false
+
+# Dominio (opcional)
+domain_name = ""  # Ejemplo: "midominio.com"
+subdomain   = "@"  # @ para dominio raíz, o "api" para api.midominio.com
