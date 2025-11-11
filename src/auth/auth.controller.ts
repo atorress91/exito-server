@@ -37,7 +37,7 @@ export class AuthController {
         user: {
           id: '1',
           name: 'John Doe',
-          email: 'user@example.com',
+          phone: '+573001234567',
         },
       },
     },
@@ -63,7 +63,7 @@ export class AuthController {
         user: {
           id: '1',
           name: 'John Doe',
-          email: 'user@example.com',
+          phone: '+573001234567',
         },
       },
     },
@@ -87,7 +87,7 @@ export class AuthController {
       example: {
         id: '1',
         name: 'John Doe',
-        email: 'user@example.com',
+        phone: '+573001234567',
       },
     },
   })
@@ -95,7 +95,7 @@ export class AuthController {
     status: 401,
     description: 'No autorizado',
   })
-  getProfile(@GetUser() user: { id: string; name: string; email: string }) {
+  getProfile(@GetUser() user: { id: string; name: string; phone: string }) {
     return user;
   }
 }

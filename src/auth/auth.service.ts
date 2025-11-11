@@ -20,15 +20,24 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
-    const { name, email, password } = registerDto;
+    const { name, email, phone, password } = registerDto;
 
-    // Verificar si el usuario ya existe
-    const existingUser = await this.userRepository.findOne({
+    // Verificar si el usuario ya existe por teléfono
+    const existingUserByPhone = await this.userRepository.findOne({
+      where: { phone },
+    });
+
+    if (existingUserByPhone) {
+      throw new ConflictException('El número de teléfono ya está registrado');
+    }
+
+    // Verificar si el email ya existe
+    const existingUserByEmail = await this.userRepository.findOne({
       where: { email },
     });
 
-    if (existingUser) {
-      throw new ConflictException('El usuario ya existe');
+    if (existingUserByEmail) {
+      throw new ConflictException('El correo electrónico ya está registrado');
     }
 
     // Hash de la contraseña
@@ -38,30 +47,34 @@ export class AuthService {
     const newUser = this.userRepository.create({
       name,
       email,
+      phone,
       password: hashedPassword,
     });
 
     await this.userRepository.save(newUser);
 
     // Generar token JWT
-    const payload: JwtPayload = { sub: newUser.id, email: newUser.email };
+    const payload: JwtPayload = {
+      sub: newUser.id.toString(),
+      phone: newUser.phone,
+    };
     const access_token = await this.jwtService.signAsync(payload);
 
     return {
       access_token,
       user: {
-        id: newUser.id,
+        id: newUser.id.toString(),
         name: newUser.name,
-        email: newUser.email,
+        phone: newUser.phone,
       },
     };
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponse> {
-    const { email, password } = loginDto;
+    const { phone, password } = loginDto;
 
-    // Buscar usuario
-    const user = await this.userRepository.findOne({ where: { email } });
+    // Buscar usuario por teléfono
+    const user = await this.userRepository.findOne({ where: { phone } });
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -73,29 +86,34 @@ export class AuthService {
     }
 
     // Generar token JWT
-    const payload: JwtPayload = { sub: user.id, email: user.email };
+    const payload: JwtPayload = {
+      sub: user.id.toString(),
+      phone: user.phone,
+    };
     const access_token = await this.jwtService.signAsync(payload);
 
     return {
       access_token,
       user: {
-        id: user.id,
+        id: user.id.toString(),
         name: user.name,
-        email: user.email,
+        phone: user.phone,
       },
     };
   }
 
   async validateUser(userId: string) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: Number.parseInt(userId) },
+    });
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
 
     return {
-      id: user.id,
+      id: user.id.toString(),
       name: user.name,
-      email: user.email,
+      phone: user.phone,
     };
   }
 }
