@@ -22,6 +22,9 @@ import { RolesModule } from './roles/roles.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: process.env.NODE_ENV !== 'production', // Solo en desarrollo
       logging: process.env.NODE_ENV === 'development',
+      ssl: {
+        rejectUnauthorized: false, // DigitalOcean requiere SSL
+      },
     }),
     AuthModule,
     RolesModule,
