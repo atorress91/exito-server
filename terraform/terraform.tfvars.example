@@ -1,7 +1,7 @@
 # Copia este archivo a terraform.tfvars y completa con tus valores
 
 # REQUERIDO: Token de DigitalOcean (obtener en: https://cloud.digitalocean.com/account/api/tokens)
-do_token = "tu-token-de-digitalocean-aqui"
+do_token = "dop_v1_cff83c72c6f97ac11178f603360644dc495da8a295bb932ae64a0a204cebf0ff"
 
 # REQUERIDO: Clave SSH pública (ejecuta: cat ~/.ssh/id_rsa.pub)
 ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... tu-clave-publica"
