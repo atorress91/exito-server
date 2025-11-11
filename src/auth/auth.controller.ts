@@ -4,7 +4,6 @@ import {
   Post,
   Get,
   UseGuards,
-  Request,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -18,6 +17,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GetUser } from './decorators/get-user.decorator';
 
 @ApiTags('Autenticación')
 @Controller('auth')
@@ -95,7 +95,7 @@ export class AuthController {
     status: 401,
     description: 'No autorizado',
   })
-  getProfile(@Request() req) {
-    return req.user;
+  getProfile(@GetUser() user: { id: string; name: string; email: string }) {
+    return user;
   }
 }
