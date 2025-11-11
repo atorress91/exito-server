@@ -71,20 +71,33 @@ variable "jwt_expires_in" {
   default     = "1d"
 }
 
+variable "database_url" {
+  description = "URL de conexión a la base de datos existente (si se proporciona, no se creará una nueva)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "create_database" {
+  description = "Crear una nueva base de datos en DigitalOcean (false si ya tienes una)"
+  type        = bool
+  default     = false
+}
+
 variable "postgres_version" {
-  description = "Versión de PostgreSQL"
+  description = "Versión de PostgreSQL (solo si create_database = true)"
   type        = string
   default     = "16"
 }
 
 variable "database_size" {
-  description = "Tamaño del cluster de base de datos"
+  description = "Tamaño del cluster de base de datos (solo si create_database = true)"
   type        = string
   default     = "db-s-1vcpu-1gb"
 }
 
 variable "database_node_count" {
-  description = "Número de nodos en el cluster de base de datos"
+  description = "Número de nodos en el cluster de base de datos (solo si create_database = true)"
   type        = number
   default     = 1
 }

@@ -28,20 +28,22 @@ resource "digitalocean_droplet" "app" {
   ssh_keys = [digitalocean_ssh_key.default.id]
 
   user_data = templatefile("${path.module}/cloud-init.yml", {
-    docker_image        = var.docker_image
-    docker_tag          = var.docker_tag
-    app_port            = var.app_port
-    database_url        = digitalocean_database_cluster.postgres.uri
-    jwt_secret          = var.jwt_secret
-    jwt_expires_in      = var.jwt_expires_in
-    node_env            = var.node_env
+    docker_image   = var.docker_image
+    docker_tag     = var.docker_tag
+    app_port       = var.app_port
+    database_url   = var.create_database ? digitalocean_database_cluster.postgres[0].uri : var.database_url
+    jwt_secret     = var.jwt_secret
+    jwt_expires_in = var.jwt_expires_in
+    node_env       = var.node_env
   })
 
   tags = [var.environment]
 }
 
-# Base de datos PostgreSQL administrada
+# Base de datos PostgreSQL administrada (OPCIONAL)
 resource "digitalocean_database_cluster" "postgres" {
+  count = var.create_database ? 1 : 0
+
   name       = "${var.project_name}-db"
   engine     = "pg"
   version    = var.postgres_version

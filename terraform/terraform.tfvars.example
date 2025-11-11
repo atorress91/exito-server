@@ -26,10 +26,19 @@ app_port       = "3000"
 node_env       = "production"
 jwt_expires_in = "1d"
 
-# Configuración de base de datos
-postgres_version     = "16"
-database_size        = "db-s-1vcpu-1gb"  # db-s-1vcpu-1gb, db-s-1vcpu-2gb, db-s-2vcpu-4gb
-database_node_count  = 1
+# ============================================
+# CONFIGURACIÓN DE BASE DE DATOS
+# ============================================
+# OPCIÓN 1: Usar base de datos existente (RECOMENDADO si ya tienes una)
+create_database = false
+database_url    = "postgresql://usuario:password@host:puerto/database"
+
+# OPCIÓN 2: Crear nueva base de datos en DigitalOcean (cuesta $15/mes adicional)
+# create_database      = true
+# postgres_version     = "16"
+# database_size        = "db-s-1vcpu-1gb"  # db-s-1vcpu-1gb, db-s-1vcpu-2gb, db-s-2vcpu-4gb
+# database_node_count  = 1
+# database_url         = ""  # Dejar vacío si create_database = true
 
 # Seguridad SSH (recomendado: especificar tu IP pública)
 allowed_ssh_ips = ["0.0.0.0/0"]  # Cambia esto por tu IP para mayor seguridad

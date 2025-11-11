@@ -10,35 +10,35 @@ output "droplet_name" {
 
 output "database_host" {
   description = "Host de la base de datos"
-  value       = digitalocean_database_cluster.postgres.host
+  value       = var.create_database ? digitalocean_database_cluster.postgres[0].host : "Using external database"
   sensitive   = true
 }
 
 output "database_port" {
   description = "Puerto de la base de datos"
-  value       = digitalocean_database_cluster.postgres.port
+  value       = var.create_database ? digitalocean_database_cluster.postgres[0].port : "N/A"
 }
 
 output "database_name" {
   description = "Nombre de la base de datos"
-  value       = digitalocean_database_cluster.postgres.database
+  value       = var.create_database ? digitalocean_database_cluster.postgres[0].database : "N/A"
 }
 
 output "database_user" {
   description = "Usuario de la base de datos"
-  value       = digitalocean_database_cluster.postgres.user
+  value       = var.create_database ? digitalocean_database_cluster.postgres[0].user : "N/A"
   sensitive   = true
 }
 
 output "database_password" {
   description = "Contraseña de la base de datos"
-  value       = digitalocean_database_cluster.postgres.password
+  value       = var.create_database ? digitalocean_database_cluster.postgres[0].password : "N/A"
   sensitive   = true
 }
 
 output "database_uri" {
   description = "URI completa de conexión a la base de datos"
-  value       = digitalocean_database_cluster.postgres.uri
+  value       = var.create_database ? digitalocean_database_cluster.postgres[0].uri : var.database_url
   sensitive   = true
 }
 
