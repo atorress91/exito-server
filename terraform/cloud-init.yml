@@ -14,15 +14,19 @@ runcmd:
   - systemctl start docker
   - systemctl enable docker
 
+  # Configurar variables de entorno necesarias
+  - export HOME=/root
+  - export XDG_CONFIG_HOME=/root/.config
+
   # Instalar doctl
   - wget -q -O /tmp/doctl.tar.gz https://github.com/digitalocean/doctl/releases/download/v1.104.0/doctl-1.104.0-linux-amd64.tar.gz
   - tar -xzf /tmp/doctl.tar.gz -C /tmp
   - mv /tmp/doctl /usr/local/bin/
   - chmod +x /usr/local/bin/doctl
 
-  # Autenticar con DigitalOcean Registry
-  - /usr/local/bin/doctl auth init -t "${do_token}"
-  - /usr/local/bin/doctl registry login
+  # Autenticar con DigitalOcean Registry usando HOME definido
+  - HOME=/root /usr/local/bin/doctl auth init -t "${do_token}"
+  - HOME=/root /usr/local/bin/doctl registry login
 
   # Pull de la imagen
   - docker pull registry.digitalocean.com/${docker_image}:${docker_tag}
@@ -43,6 +47,8 @@ write_files:
   - path: /usr/local/bin/update-app.sh
     content: |
       #!/bin/bash
+      export HOME=/root
+      export XDG_CONFIG_HOME=/root/.config
       /usr/local/bin/doctl auth init -t "${do_token}"
       /usr/local/bin/doctl registry login
       docker pull registry.digitalocean.com/${docker_image}:${docker_tag}
