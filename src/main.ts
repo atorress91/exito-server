@@ -15,6 +15,8 @@ async function bootstrap() {
     }),
   );
 
+  app.setGlobalPrefix('api/v1');
+
   // Configuración de Swagger
   const config = new DocumentBuilder()
     .setTitle('Exitojuntos API')

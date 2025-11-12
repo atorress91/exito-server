@@ -4,12 +4,15 @@ import { CountriesService } from './countries.service';
 import { Country } from '../auth/entities/country.entity';
 
 @ApiTags('countries')
-@Controller('countries')
+@Controller({ path: 'countries', version: '1' })
 export class CountriesController {
   constructor(private readonly countriesService: CountriesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Obtener todos los países' })
+  @ApiOperation({
+    summary: 'Obtener todos los países',
+    operationId: 'getAllCountries',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de todos los países',
