@@ -257,12 +257,14 @@ export class BrevoService {
     name: string,
     lastName: string,
     email: string,
+    phone: string,
     password: string,
   ): Promise<EmailResponse> {
     const params: WelcomeEmailParams = {
       name,
       lastName,
       email,
+      phone,
       password,
     };
 
@@ -272,7 +274,7 @@ export class BrevoService {
       { email, name: `${name} ${lastName}` },
       '¡Bienvenido a Éxito Juntos! 🎉',
       htmlContent,
-      `Hola ${name} ${lastName},\n\nTu cuenta ha sido creada exitosamente.\n\nTus credenciales de acceso:\nCorreo: ${email}\nContraseña temporal: ${password}\n\nPor tu seguridad, te recomendamos cambiar tu contraseña después de tu primer inicio de sesión.\n\nSaludos,\nEl equipo de Éxito Juntos`,
+      `Hola ${name} ${lastName},\n\nTu cuenta ha sido creada exitosamente.\n\nTus credenciales de acceso:\nCorreo: ${email}\nTeléfono: ${phone}\nContraseña temporal: ${password}\n\nPor tu seguridad, te recomendamos cambiar tu contraseña después de tu primer inicio de sesión.\n\nSaludos,\nEl equipo de Éxito Juntos`,
     );
   }
 }

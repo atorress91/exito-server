@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -118,6 +119,7 @@ export class AuthService {
         newUser.name,
         newUser.lastName,
         newUser.email,
+        newUser.phone,
         password, // Contraseña sin hashear
       );
       this.logger.log(`Email de bienvenida enviado a ${newUser.email}`);
@@ -233,5 +235,31 @@ export class AuthService {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  async findByPhone(phone: string) {
+    const user = await this.userRepository.findOne({
+      where: { phone },
+      relations: ['role'],
+      select: {
+        id: true,
+        name: true,
+        lastName: true,
+        phone: true,
+        city: true,
+        state: true,
+        imageProfileUrl: true,
+        role: {
+          id: true,
+          name: true,
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return user;
   }
 }

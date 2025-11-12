@@ -2,6 +2,7 @@ export interface WelcomeEmailParams {
   name: string;
   lastName: string;
   email: string;
+  phone: string;
   password: string;
 }
 
@@ -58,6 +59,16 @@ export const getWelcomeEmailTemplate = (params: WelcomeEmailParams): string => {
                                                     </span>
                                                     <span style="color: #d4af37; font-size: 16px; font-weight: 500; background-color: #1a1a1a; padding: 8px 12px; border-radius: 4px; display: inline-block; border: 1px solid #333333;">
                                                         ${params.email}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px 0;">
+                                                    <span style="color: #cccccc; font-size: 14px; font-weight: 600; display: block; margin-bottom: 5px;">
+                                                        Teléfono:
+                                                    </span>
+                                                    <span style="color: #d4af37; font-size: 16px; font-weight: 500; background-color: #1a1a1a; padding: 8px 12px; border-radius: 4px; display: inline-block; border: 1px solid #333333;">
+                                                        ${params.phone}
                                                     </span>
                                                 </td>
                                             </tr>

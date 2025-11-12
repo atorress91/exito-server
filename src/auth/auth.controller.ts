@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  Param,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -165,5 +166,38 @@ export class AuthController {
   })
   findAll(@Query() paginationDto: PaginationDto) {
     return this.authService.findAll(paginationDto);
+  }
+
+  @Get('user/phone/:phone')
+  @ApiOperation({ summary: 'Buscar usuario por número de teléfono' })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario encontrado exitosamente',
+    schema: {
+      example: {
+        id: 1,
+        name: 'John',
+        lastName: 'Doe',
+        phone: '+573001234567',
+        city: 'Bogotá',
+        state: 'Cundinamarca',
+        imageProfileUrl: 'https://example.com/profile.jpg',
+        role: {
+          id: 1,
+          name: 'Admin',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado',
+  })
+  findByPhone(@Param('phone') phone: string) {
+    return this.authService.findByPhone(phone);
   }
 }
