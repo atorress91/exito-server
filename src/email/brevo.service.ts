@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TransactionalEmailsApi, SendSmtpEmail } from '@getbrevo/brevo';
+import * as brevo from '@getbrevo/brevo';
 import {
   SendEmailOptions,
   SendTemplateEmailOptions,
@@ -15,7 +15,7 @@ import {
 @Injectable()
 export class BrevoService {
   private readonly logger = new Logger(BrevoService.name);
-  private readonly apiInstance: TransactionalEmailsApi;
+  private readonly apiInstance: brevo.TransactionalEmailsApi;
   private readonly apiKey: string | undefined;
   private readonly senderEmail: string;
   private readonly senderName: string;
@@ -28,7 +28,7 @@ export class BrevoService {
     );
     this.senderName = this.configService.get<string>(
       'BREVO_SENDER_NAME',
-      'ExitoJuntos',
+      'Éxito Juntos',
     );
 
     if (!this.apiKey) {
@@ -37,8 +37,14 @@ export class BrevoService {
       );
     }
 
-    // Configurar la autenticación
-    this.apiInstance = new TransactionalEmailsApi(this.apiKey || '');
+    // Configurar la instancia de API correctamente
+    this.apiInstance = new brevo.TransactionalEmailsApi();
+
+    // Configurar la autenticación con el API key
+    this.apiInstance.setApiKey(
+      brevo.TransactionalEmailsApiApiKeys.apiKey,
+      this.apiKey || '',
+    );
   }
 
   /**
@@ -46,7 +52,7 @@ export class BrevoService {
    */
   async sendEmail(options: SendEmailOptions): Promise<EmailResponse> {
     try {
-      const sendSmtpEmail: SendSmtpEmail = {
+      const sendSmtpEmail: brevo.SendSmtpEmail = {
         sender: {
           email: this.senderEmail,
           name: this.senderName,
@@ -134,7 +140,7 @@ export class BrevoService {
     options: SendTemplateEmailOptions,
   ): Promise<EmailResponse> {
     try {
-      const sendSmtpEmail: SendSmtpEmail = {
+      const sendSmtpEmail: brevo.SendSmtpEmail = {
         sender: {
           email: this.senderEmail,
           name: this.senderName,
