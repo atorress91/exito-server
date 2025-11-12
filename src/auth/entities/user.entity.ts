@@ -52,11 +52,17 @@ export class User {
   @Column({ type: 'bigint', nullable: true })
   father: number;
 
+  @Column({ type: 'int', nullable: true })
+  side: number;
+
   @Column({ type: 'text', nullable: true })
   imageProfileUrl: string;
 
   @Column({ type: 'text', nullable: true })
   verificationCode: string;
+
+  @Column({ type: 'bit', nullable: true })
+  termsConditions: boolean;
 
   @Column({ type: 'timestamp', nullable: true })
   birtDate: Date;

@@ -245,14 +245,20 @@ export class AuthService {
         id: true,
         name: true,
         lastName: true,
+        address: true,
+        identification: true,
         phone: true,
         city: true,
         state: true,
         imageProfileUrl: true,
+        father: true,
+        side: true,
         role: {
           id: true,
           name: true,
         },
+        birtDate: true,
+        createdAt: true,
       },
     });
 
