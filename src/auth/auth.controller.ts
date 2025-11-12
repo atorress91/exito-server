@@ -22,13 +22,16 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 
 @ApiTags('Autenticación')
-@Controller('auth')
+@Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
+  @ApiOperation({
+    summary: 'Registrar un nuevo usuario',
+    operationId: 'register',
+  })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({
     status: 201,

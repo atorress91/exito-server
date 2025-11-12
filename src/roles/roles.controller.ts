@@ -24,7 +24,7 @@ import { CreateRoleDto, UpdateRoleDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Roles')
-@Controller('roles')
+@Controller({ path: 'roles', version: 'v1' })
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class RolesController {
