@@ -31,8 +31,13 @@ export class BrevoService {
       'Éxito Juntos',
     );
 
-    if (!this.apiKey) {
-      this.logger.warn(
+    // Validar la configuración
+    if (this.apiKey) {
+      this.logger.log(
+        `Brevo configurado correctamente. API Key: ${this.apiKey.substring(0, 10)}...`,
+      );
+    } else {
+      this.logger.error(
         'BREVO_API_KEY no está configurada. El servicio de email no funcionará correctamente.',
       );
     }
