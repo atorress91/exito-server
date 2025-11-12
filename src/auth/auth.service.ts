@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,15 +12,19 @@ import { LoginDto, RegisterDto, PaginationDto } from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
+import { BrevoService } from '../email/brevo.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
     private readonly jwtService: JwtService,
+    private readonly brevoService: BrevoService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -89,6 +94,24 @@ export class AuthService {
     });
 
     await this.userRepository.save(newUser);
+
+    // Enviar email de bienvenida con credenciales
+    try {
+      await this.brevoService.sendWelcomeEmail(
+        newUser.name,
+        newUser.lastName,
+        newUser.email,
+        password, // Contraseña sin hashear
+      );
+      this.logger.log(`Email de bienvenida enviado a ${newUser.email}`);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Error al enviar email de bienvenida a ${newUser.email}: ${errorMessage}`,
+      );
+      // No lanzamos el error para no bloquear el registro
+    }
 
     // Generar token JWT
     const payload: JwtPayload = {

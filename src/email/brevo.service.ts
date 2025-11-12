@@ -7,6 +7,10 @@ import {
   EmailResponse,
   EmailRecipient,
 } from './interfaces';
+import {
+  getWelcomeEmailTemplate,
+  WelcomeEmailParams,
+} from './templates/welcome-email.template';
 
 @Injectable()
 export class BrevoService {
@@ -233,5 +237,31 @@ export class BrevoService {
    */
   isConfigured(): boolean {
     return !!this.apiKey;
+  }
+
+  /**
+   * Enviar email de bienvenida con credenciales de registro
+   */
+  async sendWelcomeEmail(
+    name: string,
+    lastName: string,
+    email: string,
+    password: string,
+  ): Promise<EmailResponse> {
+    const params: WelcomeEmailParams = {
+      name,
+      lastName,
+      email,
+      password,
+    };
+
+    const htmlContent = getWelcomeEmailTemplate(params);
+
+    return this.sendSimpleEmail(
+      { email, name: `${name} ${lastName}` },
+      '¡Bienvenido a Éxito Juntos! 🎉',
+      htmlContent,
+      `Hola ${name} ${lastName},\n\nTu cuenta ha sido creada exitosamente.\n\nTus credenciales de acceso:\nCorreo: ${email}\nContraseña temporal: ${password}\n\nPor tu seguridad, te recomendamos cambiar tu contraseña después de tu primer inicio de sesión.\n\nSaludos,\nEl equipo de Éxito Juntos`,
+    );
   }
 }
