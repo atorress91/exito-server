@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
+import { CountriesModule } from './countries/countries.module';
 import { EmailModule } from './email/email.module';
 
 @Module({
@@ -28,6 +29,7 @@ import { EmailModule } from './email/email.module';
     }),
     AuthModule,
     RolesModule,
+    CountriesModule,
     EmailModule,
   ],
   controllers: [AppController],
