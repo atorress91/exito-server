@@ -168,7 +168,7 @@ export class AuthController {
     return this.authService.findAll(paginationDto);
   }
 
-  @Get('user/phone/:phone')
+  @Get('get_user_phone/:phone')
   @ApiOperation({ summary: 'Buscar usuario por número de teléfono' })
   @ApiResponse({
     status: 200,

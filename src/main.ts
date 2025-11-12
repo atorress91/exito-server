@@ -1,10 +1,18 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Configurar CORS
+  app.enableCors({
+    origin: ['http://localhost:4200', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   // Habilitar validación global
   app.useGlobalPipes(
@@ -15,7 +23,10 @@ async function bootstrap() {
     }),
   );
 
-  app.setGlobalPrefix('api/v1');
+  // Habilitar versionado de rutas
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
 
   // Configuración de Swagger
   const config = new DocumentBuilder()
@@ -27,7 +38,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
