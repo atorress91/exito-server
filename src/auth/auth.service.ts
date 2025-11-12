@@ -12,6 +12,7 @@ import { LoginDto, RegisterDto, PaginationDto } from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
+import { Country } from './entities/country.entity';
 import { BrevoService } from '../email/brevo.service';
 
 @Injectable()
@@ -23,6 +24,8 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(Country)
+    private readonly countryRepository: Repository<Country>,
     private readonly jwtService: JwtService,
     private readonly brevoService: BrevoService,
   ) {}
@@ -43,6 +46,7 @@ export class AuthService {
       birtDate,
       father,
       roleId,
+      countryId,
     } = registerDto;
 
     // Verificar si el usuario ya existe por teléfono
@@ -72,6 +76,18 @@ export class AuthService {
       throw new ConflictException('El rol especificado no existe');
     }
 
+    // Verificar que el país existe si se proporciona
+    let country: Country | null = null;
+    if (countryId) {
+      country = await this.countryRepository.findOne({
+        where: { id: countryId },
+      });
+
+      if (!country) {
+        throw new ConflictException('El país especificado no existe');
+      }
+    }
+
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -91,6 +107,7 @@ export class AuthService {
       birtDate,
       father,
       role,
+      ...(country && { country }),
     });
 
     await this.userRepository.save(newUser);

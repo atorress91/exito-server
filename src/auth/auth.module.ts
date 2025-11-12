@@ -7,11 +7,12 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
+import { Country } from './entities/country.entity';
 import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role]),
+    TypeOrmModule.forFeature([User, Role, Country]),
     PassportModule,
     JwtModule.register({
       global: true,

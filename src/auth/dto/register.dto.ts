@@ -135,4 +135,13 @@ export class RegisterDto {
   @IsNumber()
   @IsNotEmpty()
   roleId: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ID del país del usuario',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  countryId?: number;
 }

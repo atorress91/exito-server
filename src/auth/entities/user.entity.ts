@@ -10,6 +10,7 @@ import {
   Index,
 } from 'typeorm';
 import { Role } from './role.entity';
+import { Country } from './country.entity';
 
 @Entity('users')
 export class User {
@@ -72,4 +73,8 @@ export class User {
   @ManyToOne(() => Role, (role) => role.users, { nullable: true })
   @JoinColumn({ name: 'role_id' })
   role: Role;
+
+  @ManyToOne(() => Country, { nullable: true })
+  @JoinColumn({ name: 'country_id' })
+  country: Country;
 }
