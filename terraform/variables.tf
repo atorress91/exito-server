@@ -78,6 +78,36 @@ variable "database_url" {
   default     = ""
 }
 
+variable "db_host" {
+  description = "Host de la base de datos PostgreSQL"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_port" {
+  description = "Puerto de la base de datos PostgreSQL"
+  type        = string
+  default     = "25060"
+}
+
+variable "db_username" {
+  description = "Usuario de la base de datos PostgreSQL"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_password" {
+  description = "Contraseña de la base de datos PostgreSQL"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_database" {
+  description = "Nombre de la base de datos PostgreSQL"
+  type        = string
+  default     = "exitojuntos"
+}
+
 variable "create_database" {
   description = "Crear una nueva base de datos en DigitalOcean (false si ya tienes una)"
   type        = bool

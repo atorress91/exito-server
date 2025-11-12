@@ -22,7 +22,7 @@ resource "digitalocean_ssh_key" "default" {
 # Droplet (Servidor Virtual)
 resource "digitalocean_droplet" "app" {
   image    = "docker-20-04"
-  name     = "${var.project_name}-app"
+  name     = "${var.project_name}-server"
   region   = var.region
   size     = var.droplet_size
   ssh_keys = [digitalocean_ssh_key.default.id]
@@ -32,7 +32,11 @@ resource "digitalocean_droplet" "app" {
     docker_image   = var.docker_image
     docker_tag     = var.docker_tag
     app_port       = var.app_port
-    database_url   = var.create_database ? digitalocean_database_cluster.postgres[0].uri : var.database_url
+    db_host        = var.db_host
+    db_port        = var.db_port
+    db_username    = var.db_username
+    db_password    = var.db_password
+    db_database    = var.db_database
     jwt_secret     = var.jwt_secret
     jwt_expires_in = var.jwt_expires_in
     node_env       = var.node_env
