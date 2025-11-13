@@ -5,6 +5,7 @@ import {
   CallHandler,
   HttpStatus,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiResponse } from '../interfaces/response.interface';
@@ -18,13 +19,13 @@ export class ResponseInterceptor<T>
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
     const ctx = context.switchToHttp();
-    const response = ctx.getResponse();
+    const response = ctx.getResponse<Response>();
     const statusCode = response.statusCode;
 
     return next.handle().pipe(
       map((data) => ({
         success: true,
-        data: data,
+        data,
         message: this.getDefaultMessage(statusCode),
         code: statusCode,
         errors: null,
@@ -33,7 +34,7 @@ export class ResponseInterceptor<T>
   }
 
   private getDefaultMessage(statusCode: number): string {
-    const messages: { [key: number]: string } = {
+    const messages: Record<number, string> = {
       [HttpStatus.OK]: 'Operación exitosa',
       [HttpStatus.CREATED]: 'Recurso creado exitosamente',
       [HttpStatus.NO_CONTENT]: 'Operación exitosa sin contenido',

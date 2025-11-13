@@ -36,13 +36,13 @@ export class RegisterDto {
   email: string;
 
   @ApiProperty({
-    example: '+573001234567',
-    description: 'El número de teléfono del usuario',
+    example: '573001234567',
+    description: 'El número de teléfono del usuario (solo números)',
   })
   @IsString()
   @IsNotEmpty()
-  @Matches(/^\+?[1-9]\d{1,14}$/, {
-    message: 'El número de teléfono debe ser válido',
+  @Matches(/^[1-9]\d{1,14}$/, {
+    message: 'El número de teléfono debe contener solo números',
   })
   phone: string;
 

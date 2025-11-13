@@ -36,7 +36,7 @@ export class AuthService {
       name,
       lastName,
       email,
-      phone,
+      phone: rawPhone,
       password,
       identification,
       address,
@@ -49,6 +49,9 @@ export class AuthService {
       roleId,
       countryId,
     } = registerDto;
+
+    // Limpiar el número de teléfono (eliminar + si existe)
+    const phone = rawPhone.replace(/^\+/, '');
 
     // Verificar si el usuario ya existe por teléfono
     const existingUserByPhone = await this.userRepository.findOne({
