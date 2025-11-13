@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsDateString,
   IsNumber,
+  IsBoolean,
 } from 'class-validator';
 
 export class RegisterDto {
@@ -127,6 +128,33 @@ export class RegisterDto {
   @IsNumber()
   @IsOptional()
   father?: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Lado en el árbol binario (1=izquierda, 2=derecha)',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  side?: number;
+
+  @ApiProperty({
+    example: true,
+    description: 'Estado del usuario (activo/inactivo)',
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  status?: boolean;
+
+  @ApiProperty({
+    example: true,
+    description: 'Aceptación de términos y condiciones',
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  termsConditions?: boolean;
 
   @ApiProperty({
     example: 1,
