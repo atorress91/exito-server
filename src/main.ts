@@ -10,7 +10,14 @@ async function bootstrap() {
 
   // Configurar CORS
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:3000'],
+    origin: [
+      'http://localhost:4200',
+      'http://localhost:3000',
+      'https://www.exitojuntos.com',
+      'https://exitojuntos.com',
+      'http://167.71.171.55:3000',
+      'http://167.71.171.55',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
@@ -59,6 +66,6 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
-  console.log(`Swagger documentation: ${await app.getUrl()}/api/docs`);
+  console.log(`Swagger documentation: ${await app.getUrl()}/docs`);
 }
 bootstrap();
