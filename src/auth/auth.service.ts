@@ -248,11 +248,13 @@ export class AuthService {
         address: true,
         identification: true,
         phone: true,
+        email: true,
         city: true,
         state: true,
         imageProfileUrl: true,
         father: true,
         side: true,
+        termsConditions: true,
         role: {
           id: true,
           name: true,

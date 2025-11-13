@@ -55,6 +55,9 @@ export class User {
   @Column({ type: 'int', nullable: true })
   side: number;
 
+  @Column({ type: 'bit', nullable: true })
+  status: boolean;
+
   @Column({ type: 'text', nullable: true })
   imageProfileUrl: string;
 
