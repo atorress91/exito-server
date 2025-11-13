@@ -10,6 +10,7 @@ import {
   IsNumber,
   IsBoolean,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class RegisterDto {
   @ApiProperty({
@@ -127,6 +128,7 @@ export class RegisterDto {
   })
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   father?: number;
 
   @ApiProperty({
@@ -136,6 +138,7 @@ export class RegisterDto {
   })
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   side?: number;
 
   @ApiProperty({
@@ -162,6 +165,7 @@ export class RegisterDto {
   })
   @IsNumber()
   @IsNotEmpty()
+  @Type(() => Number)
   roleId: number;
 
   @ApiProperty({
@@ -171,5 +175,6 @@ export class RegisterDto {
   })
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   countryId?: number;
 }

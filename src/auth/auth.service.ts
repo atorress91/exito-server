@@ -155,8 +155,38 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthResponse> {
     const { phone, password } = loginDto;
 
-    // Buscar usuario por teléfono
-    const user = await this.userRepository.findOne({ where: { phone } });
+    // Buscar usuario por teléfono con relaciones
+    const user = await this.userRepository.findOne({
+      where: { phone },
+      relations: ['role', 'country'],
+      select: {
+        id: true,
+        name: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        identification: true,
+        address: true,
+        city: true,
+        state: true,
+        zipCode: true,
+        imageProfileUrl: true,
+        birtDate: true,
+        father: true,
+        side: true,
+        status: true,
+        termsConditions: true,
+        password: true,
+        role: {
+          id: true,
+          name: true,
+        },
+        country: {
+          id: true,
+          name: true,
+        },
+      },
+    });
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -174,13 +204,13 @@ export class AuthService {
     };
     const access_token = await this.jwtService.signAsync(payload);
 
+    // Eliminar password del objeto de respuesta
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...userWithoutPassword } = user;
+
     return {
       access_token,
-      user: {
-        id: user.id.toString(),
-        name: user.name,
-        phone: user.phone,
-      },
+      user: userWithoutPassword,
     };
   }
 
