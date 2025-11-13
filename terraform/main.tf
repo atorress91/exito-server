@@ -42,7 +42,22 @@ resource "digitalocean_droplet" "app" {
     node_env       = var.node_env
   })
 
-  tags = [var.environment]
+  tags = [var.environment, "version-${replace(var.deployment_version, ".", "-")}"]
+
+  lifecycle {
+    create_before_destroy = true
+    replace_triggered_by = [
+      null_resource.deployment_trigger
+    ]
+  }
+}
+
+# Resource para forzar recreación cuando cambie deployment_version
+resource "null_resource" "deployment_trigger" {
+  triggers = {
+    deployment_version = var.deployment_version
+    docker_tag         = var.docker_tag
+  }
 }
 
 # Base de datos PostgreSQL administrada (OPCIONAL)

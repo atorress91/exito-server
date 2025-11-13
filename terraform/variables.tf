@@ -47,6 +47,12 @@ variable "docker_tag" {
   default     = "latest"
 }
 
+variable "deployment_version" {
+  description = "Versión de deployment para forzar recreación del droplet (cambiar este valor para actualizar)"
+  type        = string
+  default     = "v1.0.0"
+}
+
 variable "app_port" {
   description = "Puerto donde corre la aplicación"
   type        = string

@@ -21,6 +21,9 @@ droplet_size = "s-1vcpu-2gb"  # s-1vcpu-1gb, s-1vcpu-2gb, s-2vcpu-2gb, s-2vcpu-4
 docker_image = "exitojuntos-server"
 docker_tag   = "latest"
 
+# Versión de deployment (cambiar para forzar actualización del droplet)
+deployment_version = "v1.0.0"
+
 # Configuración de la aplicación
 app_port       = "3000"
 node_env       = "production"
