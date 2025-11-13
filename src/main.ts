@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,7 +13,16 @@ async function bootstrap() {
     origin: ['http://localhost:4200', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Cache-Control',
+      'Pragma',
+      'Expires',
+      'X-Requested-With',
+    ],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
 
   // Habilitar validación global
@@ -22,6 +33,12 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Aplicar interceptor global de respuestas
+  app.useGlobalInterceptors(new ResponseInterceptor());
+
+  // Aplicar filtro global de excepciones
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Habilitar versionado de rutas
   app.enableVersioning({
