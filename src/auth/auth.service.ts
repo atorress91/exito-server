@@ -14,7 +14,8 @@ import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { Country } from './entities/country.entity';
-import { BrevoService } from '../email/brevo.service';
+import { EmailService } from '../email';
+import { getWelcomeEmailTemplate } from '../email/templates/welcome-email.template';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,7 @@ export class AuthService {
     @InjectRepository(Country)
     private readonly countryRepository: Repository<Country>,
     private readonly jwtService: JwtService,
-    private readonly brevoService: BrevoService,
+    private readonly emailService: EmailService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -116,21 +117,30 @@ export class AuthService {
 
     await this.userRepository.save(newUser);
 
-    // Enviar email de bienvenida con credenciales
+    // Enviar email de bienvenida con credenciales (de forma asíncrona con cola)
     try {
-      await this.brevoService.sendWelcomeEmail(
-        newUser.name,
-        newUser.lastName,
-        newUser.email,
-        newUser.phone,
-        password, // Contraseña sin hashear
-      );
-      this.logger.log(`Email de bienvenida enviado a ${newUser.email}`);
+      const welcomeEmailHtml = getWelcomeEmailTemplate({
+        name: newUser.name,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        phone: newUser.phone,
+        password: password, // Contraseña sin hashear
+      });
+
+      await this.emailService.queueEmail({
+        to: [
+          { email: newUser.email, name: `${newUser.name} ${newUser.lastName}` },
+        ],
+        subject: '¡Bienvenido a Éxito Juntos!',
+        htmlContent: welcomeEmailHtml,
+      });
+
+      this.logger.log(`Email de bienvenida encolado para ${newUser.email}`);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
-        `Error al enviar email de bienvenida a ${newUser.email}: ${errorMessage}`,
+        `Error al encolar email de bienvenida para ${newUser.email}: ${errorMessage}`,
       );
       // No lanzamos el error para no bloquear el registro
     }
