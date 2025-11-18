@@ -4,4 +4,5 @@ export interface ApiResponse<T = any> {
   message: string;
   code: number;
   errors?: any;
+  meta?: Record<string, any>;
 }
