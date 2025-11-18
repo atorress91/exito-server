@@ -339,8 +339,9 @@ export class AuthService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // Verificar si el usuario es admin
-    const isAdmin = user.role?.name?.toLowerCase() === 'admin';
+    // Verificar si el usuario es admin comparando por ID del rol
+    // Admin tiene role_id = 1, Client tiene role_id = 2
+    const isAdmin = user.role?.id === 1;
 
     // Si no es admin, solo puede ver su propio árbol
     const targetUserId =
