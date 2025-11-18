@@ -9,10 +9,20 @@ import { RolesModule } from './roles/roles.module';
 import { CountriesModule } from './countries/countries.module';
 import { EmailModule } from './email';
 
+const envFilePath = process.env.NODE_ENV
+  ? [
+      `.env.${process.env.NODE_ENV}.local`,
+      `.env.${process.env.NODE_ENV}`,
+      '.env.local',
+      '.env',
+    ]
+  : ['.env.local', '.env'];
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath,
     }),
     BullModule.forRoot({
       redis: {
