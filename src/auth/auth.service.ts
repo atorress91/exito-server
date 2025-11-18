@@ -9,8 +9,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { LoginDto, RegisterDto, PaginationDto } from './dto';
+import {
+  LoginDto,
+  RegisterDto,
+  PaginationDto,
+  GetUnilevelTreeDto,
+} from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
+import {
+  UnilevelTreeNode,
+  UnilevelTreeResponse,
+} from './interfaces/unilevel-tree.interface';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { Country } from './entities/country.entity';
@@ -312,5 +321,50 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async getUnilevelTree(
+    requestingUser: { id: string; phone: string },
+    unilevelTreeDto: GetUnilevelTreeDto,
+  ): Promise<UnilevelTreeResponse> {
+    const { userId, maxLevel = 10 } = unilevelTreeDto;
+
+    // Obtener el usuario completo con su rol para verificar si es admin
+    const user = await this.userRepository.findOne({
+      where: { id: Number.parseInt(requestingUser.id) },
+      relations: ['role'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    // Verificar si el usuario es admin
+    const isAdmin = user.role?.name?.toLowerCase() === 'admin';
+
+    // Si no es admin, solo puede ver su propio árbol
+    const targetUserId =
+      isAdmin && userId ? userId : Number.parseInt(requestingUser.id);
+
+    // Ejecutar el stored procedure
+    const query = `
+      SELECT * FROM get_unilevel_family_tree($1, $2, $3)
+    `;
+
+    const tree: UnilevelTreeNode[] = await this.userRepository.query(query, [
+      targetUserId,
+      maxLevel,
+      isAdmin,
+    ]);
+
+    // Calcular el nivel máximo real en el resultado
+    const maxLevelInTree =
+      tree.length > 0 ? Math.max(...tree.map((node) => node.level)) : 0;
+
+    return {
+      tree,
+      totalNodes: tree.length,
+      maxLevel: maxLevelInTree,
+    };
   }
 }

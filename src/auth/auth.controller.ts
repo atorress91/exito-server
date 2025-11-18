@@ -18,7 +18,12 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, PaginationDto } from './dto';
+import {
+  LoginDto,
+  RegisterDto,
+  PaginationDto,
+  GetUnilevelTreeDto,
+} from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 
@@ -220,5 +225,70 @@ export class AuthController {
   })
   findByPhone(@Param('phone') phone: string) {
     return this.authService.findByPhone(phone);
+  }
+
+  @Get('unilevel-tree')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener árbol unilevel del usuario',
+    description:
+      'Obtiene el árbol genealógico unilevel del usuario. Los usuarios regulares solo pueden ver su propio árbol, mientras que los administradores pueden especificar un userId para ver cualquier árbol.',
+  })
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: Number,
+    description: 'ID del usuario raíz del árbol (solo para administradores)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'maxLevel',
+    required: false,
+    type: Number,
+    description: 'Nivel máximo de profundidad del árbol (1-20)',
+    example: 10,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Árbol unilevel obtenido exitosamente',
+    schema: {
+      example: {
+        tree: [
+          {
+            id: 1,
+            phone: '573001234567',
+            email: 'john@example.com',
+            level: 0,
+            father: null,
+            imageProfileUrl: 'https://example.com/profile.jpg',
+          },
+          {
+            id: 2,
+            phone: '573001234568',
+            email: 'jane@example.com',
+            level: 1,
+            father: 1,
+            imageProfileUrl: 'https://example.com/profile2.jpg',
+          },
+        ],
+        totalNodes: 2,
+        maxLevel: 1,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+  })
+  getUnilevelTree(
+    @GetUser() user: { id: string; phone: string },
+    @Query() unilevelTreeDto: GetUnilevelTreeDto,
+  ) {
+    return this.authService.getUnilevelTree(user, unilevelTreeDto);
   }
 }
