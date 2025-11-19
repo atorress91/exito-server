@@ -20,6 +20,10 @@ import {
   UnilevelTreeNode,
   UnilevelTreeResponse,
 } from './interfaces/unilevel-tree.interface';
+import {
+  PersonalNetworkNode,
+  PersonalNetworkResponse,
+} from './interfaces/personal-network.interface';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { Country } from './entities/country.entity';
@@ -366,6 +370,41 @@ export class AuthService {
       tree,
       totalNodes: tree.length,
       maxLevel: maxLevelInTree,
+    };
+  }
+
+  async getPersonalNetwork(
+    requestingUser: { id: string; phone: string },
+    userId?: number,
+  ): Promise<PersonalNetworkResponse> {
+    // Obtener el usuario completo con su rol para verificar si es admin
+    const user = await this.userRepository.findOne({
+      where: { id: Number.parseInt(requestingUser.id) },
+      relations: ['role'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    // Verificar si el usuario es admin
+    const isAdmin = user.role?.id === 1;
+
+    // Si no es admin, solo puede ver su propia red
+    const targetUserId =
+      isAdmin && userId ? userId : Number.parseInt(requestingUser.id);
+
+    // Ejecutar el stored procedure
+    const query = `SELECT * FROM get_personal_network($1)`;
+
+    const network: PersonalNetworkNode[] = await this.userRepository.query(
+      query,
+      [targetUserId],
+    );
+
+    return {
+      network,
+      totalNodes: network.length,
     };
   }
 }

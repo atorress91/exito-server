@@ -291,4 +291,69 @@ export class AuthController {
   ) {
     return this.authService.getUnilevelTree(user, unilevelTreeDto);
   }
+
+  @Get('personal-network')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener red personal del usuario',
+    description:
+      'Obtiene todos los usuarios de la red personal del usuario (todos los niveles descendientes). Los usuarios regulares solo pueden ver su propia red, mientras que los administradores pueden especificar un userId para ver cualquier red.',
+  })
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: Number,
+    description: 'ID del usuario raíz de la red (solo para administradores)',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Red personal obtenida exitosamente',
+    schema: {
+      example: {
+        network: [
+          {
+            id: 2,
+            full_name: 'Jane Doe',
+            email: 'jane@example.com',
+            phone: '573001234568',
+            country_name: 'Colombia',
+            status: true,
+            father: 1,
+            latitude: 4.7109886,
+            longitude: -74.072092,
+            created_at: '2025-11-11T00:00:00.000Z',
+          },
+          {
+            id: 3,
+            full_name: 'Bob Smith',
+            email: 'bob@example.com',
+            phone: '573001234569',
+            country_name: 'Colombia',
+            status: true,
+            father: 2,
+            latitude: 4.7109886,
+            longitude: -74.072092,
+            created_at: '2025-11-12T00:00:00.000Z',
+          },
+        ],
+        totalNodes: 2,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+  })
+  getPersonalNetwork(
+    @GetUser() user: { id: string; phone: string },
+    @Query('userId') userId?: number,
+  ) {
+    return this.authService.getPersonalNetwork(user, userId);
+  }
 }
