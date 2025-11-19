@@ -162,6 +162,7 @@ export class AuthService {
     const payload: JwtPayload = {
       sub: newUser.id.toString(),
       phone: newUser.phone,
+      role: newUser.role.name,
     };
     const access_token = await this.jwtService.signAsync(payload);
 
@@ -224,6 +225,7 @@ export class AuthService {
     const payload: JwtPayload = {
       sub: user.id.toString(),
       phone: user.phone,
+      role: user.role.name,
     };
     const access_token = await this.jwtService.signAsync(payload);
 
@@ -240,6 +242,7 @@ export class AuthService {
   async validateUser(userId: string) {
     const user = await this.userRepository.findOne({
       where: { id: Number.parseInt(userId) },
+      relations: ['role'],
     });
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
@@ -249,6 +252,7 @@ export class AuthService {
       id: user.id.toString(),
       name: user.name,
       phone: user.phone,
+      role: user.role.name,
     };
   }
 
@@ -374,21 +378,11 @@ export class AuthService {
   }
 
   async getPersonalNetwork(
-    requestingUser: { id: string; phone: string },
+    requestingUser: { id: string; phone: string; role: string },
     userId?: number,
   ): Promise<PersonalNetworkResponse> {
-    // Obtener el usuario completo con su rol para verificar si es admin
-    const user = await this.userRepository.findOne({
-      where: { id: Number.parseInt(requestingUser.id) },
-      relations: ['role'],
-    });
-
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    // Verificar si el usuario es admin
-    const isAdmin = user.role?.id === 1;
+    // Verificar si el usuario es admin usando el nombre del rol
+    const isAdmin = requestingUser.role === 'Admin';
 
     // Si no es admin, solo puede ver su propia red
     const targetUserId =

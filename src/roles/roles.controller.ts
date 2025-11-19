@@ -22,10 +22,13 @@ import {
 import { RolesService } from './roles.service';
 import { CreateRoleDto, UpdateRoleDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Roles')
 @Controller({ path: 'roles', version: 'v1' })
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('Admin')
 @ApiBearerAuth()
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}

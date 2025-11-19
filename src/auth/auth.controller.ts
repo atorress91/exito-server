@@ -25,7 +25,9 @@ import {
   GetUnilevelTreeDto,
 } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 import { GetUser } from './decorators/get-user.decorator';
+import { Roles } from './decorators/roles.decorator';
 
 @ApiTags('Autenticación')
 @Controller({ path: 'auth', version: '1' })
@@ -132,7 +134,8 @@ export class AuthController {
   }
 
   @Get('users')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener todos los usuarios con paginación' })
   @ApiQuery({
@@ -286,7 +289,7 @@ export class AuthController {
     description: 'Usuario no encontrado',
   })
   getUnilevelTree(
-    @GetUser() user: { id: string; phone: string },
+    @GetUser() user: { id: string; phone: string; role: string },
     @Query() unilevelTreeDto: GetUnilevelTreeDto,
   ) {
     return this.authService.getUnilevelTree(user, unilevelTreeDto);
@@ -351,7 +354,7 @@ export class AuthController {
     description: 'Usuario no encontrado',
   })
   getPersonalNetwork(
-    @GetUser() user: { id: string; phone: string },
+    @GetUser() user: { id: string; phone: string; role: string },
     @Query('userId') userId?: number,
   ) {
     return this.authService.getPersonalNetwork(user, userId);
