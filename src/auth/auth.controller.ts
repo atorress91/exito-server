@@ -153,7 +153,7 @@ export class AuthController {
 
   @Get('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('Admin')
+  @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener todos los usuarios con paginación' })
   @ApiQuery({
