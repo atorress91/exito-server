@@ -3,6 +3,7 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -23,11 +24,13 @@ import {
   RegisterDto,
   PaginationDto,
   GetUnilevelTreeDto,
+  UpdateProfileDto,
 } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { Roles } from './decorators/roles.decorator';
+import { User } from './entities/user.entity';
 
 @ApiTags('Autenticación')
 @Controller({ path: 'auth', version: '1' })
@@ -131,6 +134,21 @@ export class AuthController {
   })
   getProfile(@GetUser() user: { id: string; name: string; phone: string }) {
     return user;
+  }
+
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar perfil del usuario autenticado' })
+  @ApiBody({ type: UpdateProfileDto })
+  @ApiResponse({ status: 200, description: 'Perfil actualizado correctamente' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  async updateProfile(
+    @GetUser() user: { id: string },
+    @Body() updateProfileDto: UpdateProfileDto,
+  ): Promise<Partial<User>> {
+    return this.authService.updateProfile(user.id, updateProfileDto);
   }
 
   @Get('users')

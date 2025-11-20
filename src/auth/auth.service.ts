@@ -14,6 +14,7 @@ import {
   RegisterDto,
   PaginationDto,
   GetUnilevelTreeDto,
+  UpdateProfileDto,
 } from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
 import {
@@ -209,6 +210,8 @@ export class AuthService {
           id: true,
           name: true,
         },
+        createdAt: true,
+        updatedAt: true,
       },
     });
     if (!user) {
@@ -400,5 +403,83 @@ export class AuthService {
       network,
       totalNodes: network.length,
     };
+  }
+
+  async updateProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<Partial<User>> {
+    const user = await this.userRepository.findOne({
+      where: { id: Number.parseInt(userId) },
+      relations: ['role', 'country'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const dto: UpdateProfileDto = updateProfileDto;
+
+    // Aplicar solo los campos mutables proporcionados, excluyendo email y phone
+    if (dto.name !== undefined) {
+      user.name = dto.name;
+    }
+    if (dto.lastName !== undefined) {
+      user.lastName = dto.lastName;
+    }
+    if (dto.identification !== undefined) {
+      user.identification = dto.identification;
+    }
+    if (dto.address !== undefined) {
+      user.address = dto.address;
+    }
+    if (dto.city !== undefined) {
+      user.city = dto.city;
+    }
+    if (dto.state !== undefined) {
+      user.state = dto.state;
+    }
+    if (dto.zipCode !== undefined) {
+      user.zipCode = dto.zipCode;
+    }
+    if (dto.imageProfileUrl !== undefined) {
+      user.imageProfileUrl = dto.imageProfileUrl;
+    }
+    if (dto.birtDate !== undefined) {
+      user.birtDate = dto.birtDate;
+    }
+    if (dto.father !== undefined) {
+      user.father = dto.father;
+    }
+    if (dto.side !== undefined) {
+      user.side = dto.side;
+    }
+    if (dto.status !== undefined) {
+      user.status = dto.status;
+    }
+    if (dto.termsConditions !== undefined) {
+      user.termsConditions = dto.termsConditions;
+    }
+
+    // Manejar actualización del país si se proporciona
+    if (dto.countryId !== undefined) {
+      const country = await this.countryRepository.findOne({
+        where: { id: dto.countryId },
+      });
+
+      if (!country) {
+        throw new NotFoundException('El país especificado no existe');
+      }
+
+      user.country = country;
+    }
+
+    const updatedUser = await this.userRepository.save(user);
+
+    // Eliminar password del objeto de respuesta
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...userWithoutPassword } = updatedUser;
+
+    return userWithoutPassword;
   }
 }
