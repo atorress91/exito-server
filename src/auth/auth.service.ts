@@ -144,9 +144,12 @@ export class AuthService {
         password: password, // Contraseña sin hashear
       });
 
+      // Determinar la ruta base dependiendo del entorno
+      // En desarrollo: src/assets, En producción: dist/assets
+      const isDevelopment = process.env.NODE_ENV !== 'production';
       const termsFilePath = path.join(
         process.cwd(),
-        'dist',
+        isDevelopment ? 'src' : 'dist',
         'assets',
         'docs',
         'terminos-condiciones.pdf',
@@ -163,9 +166,14 @@ export class AuthService {
             content: base64Content,
           },
         ];
-      } catch {
+        this.logger.log(
+          `Archivo de términos cargado correctamente desde: ${termsFilePath}`,
+        );
+      } catch (fileError) {
+        const errorMessage =
+          fileError instanceof Error ? fileError.message : 'Error desconocido';
         this.logger.warn(
-          `No se pudo leer el archivo de términos en: ${termsFilePath}`,
+          `No se pudo leer el archivo de términos en: ${termsFilePath}. Error: ${errorMessage}`,
         );
       }
 
