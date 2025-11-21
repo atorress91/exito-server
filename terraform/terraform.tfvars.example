@@ -52,3 +52,16 @@ enable_load_balancer = false
 # Dominio (opcional)
 domain_name = ""  # Ejemplo: "midominio.com"
 subdomain   = "@"  # @ para dominio raíz, o "api" para api.midominio.com
+
+# ============================================
+# CONFIGURACIÓN DE REDIS
+# ============================================
+redis_host     = "redis"      # Nombre del contenedor Redis (por defecto "redis")
+redis_port     = "6379"       # Puerto de Redis
+redis_password = ""           # Contraseña de Redis (opcional, dejar vacío si no tiene)
+
+# ============================================
+# CONFIGURACIÓN DE EMAIL (BREVO)
+# ============================================
+# REQUERIDO: API Key de Brevo (obtener en: https://app.brevo.com/settings/keys/api)
+brevo_api_key = "tu-brevo-api-key-aqui"

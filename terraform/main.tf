@@ -40,6 +40,10 @@ resource "digitalocean_droplet" "app" {
     jwt_secret     = var.jwt_secret
     jwt_expires_in = var.jwt_expires_in
     node_env       = var.node_env
+    redis_host     = var.redis_host
+    redis_port     = var.redis_port
+    redis_password = var.redis_password
+    brevo_api_key  = var.brevo_api_key
   })
 
   tags = [var.environment, "version-${replace(var.deployment_version, ".", "-")}"]

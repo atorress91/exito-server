@@ -36,7 +36,7 @@ runcmd:
   - docker rm exitojuntos-app 2>/dev/null || true
 
   # Ejecutar contenedor
-  - docker run -d --name exitojuntos-app --restart unless-stopped -p ${app_port}:${app_port} -e NODE_ENV=${node_env} -e PORT=${app_port} -e DB_HOST=${db_host} -e DB_PORT=${db_port} -e DB_USERNAME=${db_username} -e DB_PASSWORD="${db_password}" -e DB_DATABASE=${db_database} -e JWT_SECRET="${jwt_secret}" -e JWT_EXPIRES_IN="${jwt_expires_in}" registry.digitalocean.com/${docker_image}:${docker_tag}
+  - docker run -d --name exitojuntos-app --restart unless-stopped --link redis:redis -p ${app_port}:${app_port} -e NODE_ENV=${node_env} -e PORT=${app_port} -e REDIS_HOST=${redis_host} -e REDIS_PORT=${redis_port} -e REDIS_PASSWORD="${redis_password}" -e BREVO_API_KEY="${brevo_api_key}" -e DB_HOST=${db_host} -e DB_PORT=${db_port} -e DB_USERNAME=${db_username} -e DB_PASSWORD="${db_password}" -e DB_DATABASE=${db_database} -e JWT_SECRET="${jwt_secret}" -e JWT_EXPIRES_IN="${jwt_expires_in}" registry.digitalocean.com/${docker_image}:${docker_tag}
 
   # Esperar y verificar logs
   - sleep 10
@@ -54,7 +54,7 @@ write_files:
       docker pull registry.digitalocean.com/${docker_image}:${docker_tag}
       docker stop exitojuntos-app
       docker rm exitojuntos-app
-      docker run -d --name exitojuntos-app --restart unless-stopped -p ${app_port}:${app_port} -e NODE_ENV=${node_env} -e PORT=${app_port} -e DB_HOST=${db_host} -e DB_PORT=${db_port} -e DB_USERNAME=${db_username} -e DB_PASSWORD="${db_password}" -e DB_DATABASE=${db_database} -e JWT_SECRET="${jwt_secret}" -e JWT_EXPIRES_IN="${jwt_expires_in}" registry.digitalocean.com/${docker_image}:${docker_tag}
+      docker run -d --name exitojuntos-app --restart unless-stopped --link redis:redis -p ${app_port}:${app_port} -e NODE_ENV=${node_env} -e PORT=${app_port} -e REDIS_HOST=${redis_host} -e REDIS_PORT=${redis_port} -e REDIS_PASSWORD="${redis_password}" -e BREVO_API_KEY="${brevo_api_key}" -e DB_HOST=${db_host} -e DB_PORT=${db_port} -e DB_USERNAME=${db_username} -e DB_PASSWORD="${db_password}" -e DB_DATABASE=${db_database} -e JWT_SECRET="${jwt_secret}" -e JWT_EXPIRES_IN="${jwt_expires_in}" registry.digitalocean.com/${docker_image}:${docker_tag}
     permissions: '0755'
 
 final_message: 'Exitojuntos deployed at http://$INSTANCE_IP:${app_port}'

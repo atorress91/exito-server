@@ -161,3 +161,28 @@ variable "subdomain" {
   type        = string
   default     = "@"
 }
+
+variable "redis_host" {
+  description = "Host de Redis"
+  type        = string
+  default     = "redis"
+}
+
+variable "redis_port" {
+  description = "Puerto de Redis"
+  type        = string
+  default     = "6379"
+}
+
+variable "redis_password" {
+  description = "Contraseña de Redis (opcional)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "brevo_api_key" {
+  description = "API Key de Brevo para envío de emails"
+  type        = string
+  sensitive   = true
+}

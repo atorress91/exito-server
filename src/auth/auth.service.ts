@@ -134,67 +134,19 @@ export class AuthService {
 
     await this.userRepository.save(newUser);
 
-    // Enviar email de bienvenida con credenciales (de forma asíncrona con cola)
-    try {
-      const welcomeEmailHtml = getWelcomeEmailTemplate({
-        name: newUser.name,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        phone: newUser.phone,
-        password: password, // Contraseña sin hashear
-      });
-
-      // Determinar la ruta base dependiendo del entorno
-      // En desarrollo: src/assets, En producción: dist/assets
-      const isDevelopment = process.env.NODE_ENV !== 'production';
-      const termsFilePath = path.join(
-        process.cwd(),
-        isDevelopment ? 'src' : 'dist',
-        'assets',
-        'docs',
-        'terminos-condiciones.pdf',
-      );
-
-      let attachments: EmailAttachment[] = [];
-      try {
-        const fileBuffer = await fs.readFile(termsFilePath);
-        const base64Content = fileBuffer.toString('base64');
-
-        attachments = [
-          {
-            name: 'Terminos_y_Condiciones.pdf',
-            content: base64Content,
-          },
-        ];
-        this.logger.log(
-          `Archivo de términos cargado correctamente desde: ${termsFilePath}`,
-        );
-      } catch (fileError) {
-        const errorMessage =
-          fileError instanceof Error ? fileError.message : 'Error desconocido';
-        this.logger.warn(
-          `No se pudo leer el archivo de términos en: ${termsFilePath}. Error: ${errorMessage}`,
-        );
-      }
-
-      await this.emailService.queueEmail({
-        to: [
-          { email: newUser.email, name: `${newUser.name} ${newUser.lastName}` },
-        ],
-        subject: '¡Bienvenido a Éxito Juntos!',
-        htmlContent: welcomeEmailHtml,
-        attachments: attachments,
-      });
-
-      this.logger.log(`Email de bienvenida encolado para ${newUser.email}`);
-    } catch (error) {
+    // Enviar email de bienvenida con PDF en segundo plano (con timeout de 3s)
+    Promise.race([
+      this.sendWelcomeEmail(newUser, password),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Email timeout')), 3000),
+      ),
+    ]).catch((error) => {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
-        `Error al encolar email de bienvenida para ${newUser.email}: ${errorMessage}`,
+      this.logger.warn(
+        `Email encolado en segundo plano para ${newUser.email}: ${errorMessage}`,
       );
-      // No lanzamos el error para no bloquear el registro
-    }
+    });
 
     // Generar token JWT
     const payload: JwtPayload = {
@@ -502,5 +454,59 @@ export class AuthService {
     const { password, ...userWithoutPassword } = updatedUser;
 
     return userWithoutPassword;
+  }
+
+  /**
+   * Envía el email de bienvenida con PDF de forma asíncrona
+   */
+  private async sendWelcomeEmail(
+    user: User,
+    plainPassword: string,
+  ): Promise<void> {
+    const welcomeEmailHtml = getWelcomeEmailTemplate({
+      name: user.name,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      password: plainPassword,
+    });
+
+    // Determinar la ruta del PDF
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    const termsFilePath = path.join(
+      process.cwd(),
+      isDevelopment ? 'src' : 'dist',
+      'assets',
+      'docs',
+      'terminos-condiciones.pdf',
+    );
+
+    let attachments: EmailAttachment[] = [];
+
+    // Intentar leer el PDF, pero no fallar si no existe
+    try {
+      const fileBuffer = await fs.readFile(termsFilePath);
+      attachments = [
+        {
+          name: 'Terminos_y_Condiciones.pdf',
+          content: fileBuffer.toString('base64'),
+        },
+      ];
+      this.logger.log(`PDF adjuntado para ${user.email}`);
+    } catch {
+      this.logger.warn(
+        `PDF no encontrado en ${termsFilePath}, enviando email sin adjunto`,
+      );
+    }
+
+    // Encolar el email (esto solo añade a la cola, no envía)
+    await this.emailService.queueEmail({
+      to: [{ email: user.email, name: `${user.name} ${user.lastName}` }],
+      subject: '¡Bienvenido a Éxito Juntos!',
+      htmlContent: welcomeEmailHtml,
+      attachments,
+    });
+
+    this.logger.log(`Email con PDF encolado correctamente para ${user.email}`);
   }
 }
