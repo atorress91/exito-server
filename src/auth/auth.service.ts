@@ -434,6 +434,30 @@ export class AuthService {
     };
   }
 
+  private applyProfileUpdates(user: User, dto: UpdateProfileDto): void {
+    const updatableFields: (keyof UpdateProfileDto)[] = [
+      'name',
+      'lastName',
+      'identification',
+      'address',
+      'city',
+      'state',
+      'zipCode',
+      'imageProfileUrl',
+      'birtDate',
+      'father',
+      'side',
+      'status',
+      'termsConditions',
+    ];
+
+    for (const field of updatableFields) {
+      if (dto[field] !== undefined) {
+        user[field] = dto[field];
+      }
+    }
+  }
+
   async updateProfile(
     userId: string,
     updateProfileDto: UpdateProfileDto,
@@ -447,53 +471,13 @@ export class AuthService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const dto: UpdateProfileDto = updateProfileDto;
-
     // Aplicar solo los campos mutables proporcionados, excluyendo email y phone
-    if (dto.name !== undefined) {
-      user.name = dto.name;
-    }
-    if (dto.lastName !== undefined) {
-      user.lastName = dto.lastName;
-    }
-    if (dto.identification !== undefined) {
-      user.identification = dto.identification;
-    }
-    if (dto.address !== undefined) {
-      user.address = dto.address;
-    }
-    if (dto.city !== undefined) {
-      user.city = dto.city;
-    }
-    if (dto.state !== undefined) {
-      user.state = dto.state;
-    }
-    if (dto.zipCode !== undefined) {
-      user.zipCode = dto.zipCode;
-    }
-    if (dto.imageProfileUrl !== undefined) {
-      user.imageProfileUrl = dto.imageProfileUrl;
-    }
-    if (dto.birtDate !== undefined) {
-      user.birtDate = dto.birtDate;
-    }
-    if (dto.father !== undefined) {
-      user.father = dto.father;
-    }
-    if (dto.side !== undefined) {
-      user.side = dto.side;
-    }
-    if (dto.status !== undefined) {
-      user.status = dto.status;
-    }
-    if (dto.termsConditions !== undefined) {
-      user.termsConditions = dto.termsConditions;
-    }
+    this.applyProfileUpdates(user, updateProfileDto);
 
     // Manejar actualización del país si se proporciona
-    if (dto.countryId !== undefined) {
+    if (updateProfileDto.countryId !== undefined) {
       const country = await this.countryRepository.findOne({
-        where: { id: dto.countryId },
+        where: { id: updateProfileDto.countryId },
       });
 
       if (!country) {
