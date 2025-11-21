@@ -129,6 +129,9 @@ export class AuthService {
       birtDate,
       father,
       role,
+      status: true,
+      termsConditions: true,
+      side: 0,
       ...(country && { country }),
     });
 
