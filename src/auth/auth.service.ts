@@ -17,6 +17,9 @@ import {
   UpdateProfileDto,
 } from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
+import * as path from 'node:path';
+import * as fs from 'node:fs/promises';
+
 import {
   UnilevelTreeNode,
   UnilevelTreeResponse,
@@ -28,7 +31,7 @@ import {
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { Country } from './entities/country.entity';
-import { EmailService } from '../email';
+import { EmailAttachment, EmailService } from '../email';
 import { getWelcomeEmailTemplate } from '../email/templates/welcome-email.template';
 
 @Injectable()
@@ -141,12 +144,38 @@ export class AuthService {
         password: password, // Contraseña sin hashear
       });
 
+      const termsFilePath = path.join(
+        process.cwd(),
+        'dist',
+        'assets',
+        'docs',
+        'terminos-condiciones.pdf',
+      );
+
+      let attachments: EmailAttachment[] = [];
+      try {
+        const fileBuffer = await fs.readFile(termsFilePath);
+        const base64Content = fileBuffer.toString('base64');
+
+        attachments = [
+          {
+            name: 'Terminos_y_Condiciones.pdf',
+            content: base64Content,
+          },
+        ];
+      } catch {
+        this.logger.warn(
+          `No se pudo leer el archivo de términos en: ${termsFilePath}`,
+        );
+      }
+
       await this.emailService.queueEmail({
         to: [
           { email: newUser.email, name: `${newUser.name} ${newUser.lastName}` },
         ],
         subject: '¡Bienvenido a Éxito Juntos!',
         htmlContent: welcomeEmailHtml,
+        attachments: attachments,
       });
 
       this.logger.log(`Email de bienvenida encolado para ${newUser.email}`);
