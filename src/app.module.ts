@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
 import { CountriesModule } from './countries/countries.module';
 import { EmailModule } from './email';
+import { LogsModule } from './logs';
 
 const envFilePath = process.env.NODE_ENV
   ? [
@@ -49,6 +50,7 @@ const envFilePath = process.env.NODE_ENV
     RolesModule,
     CountriesModule,
     EmailModule,
+    LogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

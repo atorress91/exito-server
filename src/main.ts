@@ -4,9 +4,16 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { CustomLoggerService } from './logs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
+  // Configurar el logger personalizado
+  const customLogger = app.get(CustomLoggerService);
+  app.useLogger(customLogger);
 
   // Configurar CORS
   app.enableCors({
@@ -70,4 +77,5 @@ async function bootstrap() {
   console.log(`Application is running on: ${await app.getUrl()}`);
   console.log(`Swagger documentation: ${await app.getUrl()}/docs`);
 }
-bootstrap();
+
+void bootstrap();
