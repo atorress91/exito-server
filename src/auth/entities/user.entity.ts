@@ -55,7 +55,7 @@ export class User {
   @Column({ type: 'int', nullable: true })
   side: number;
 
-  @Column({ type: 'bit', nullable: true })
+  @Column({ type: 'boolean', nullable: true })
   status: boolean;
 
   @Column({ type: 'text', nullable: true })
@@ -64,7 +64,7 @@ export class User {
   @Column({ type: 'text', nullable: true })
   verificationCode: string;
 
-  @Column({ type: 'bit', nullable: true })
+  @Column({ type: 'boolean', nullable: true })
   termsConditions: boolean;
 
   @Column({ type: 'timestamp', nullable: true })
