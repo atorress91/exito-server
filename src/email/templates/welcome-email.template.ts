@@ -5,6 +5,7 @@ export interface WelcomeEmailData {
   phone: string;
   password: string;
   verificationCode: string;
+  frontendUrl: string;
 }
 
 export const getWelcomeEmailTemplate = (params: WelcomeEmailData): string => {
@@ -61,7 +62,7 @@ export const getWelcomeEmailTemplate = (params: WelcomeEmailData): string => {
                             <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
                                 <tr>
                                     <td style="text-align: center;">
-                                        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify?code=${params.verificationCode}" style="display: inline-block; background-color: #d4af37; color: #000000; text-decoration: none; padding: 18px 60px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 5px;">
+                                        <a href="${params.frontendUrl}/verify?code=${params.verificationCode}" style="display: inline-block; background-color: #d4af37; color: #000000; text-decoration: none; padding: 18px 60px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 5px;">
                                             ACTIVAR CUENTA
                                         </a>
                                     </td>

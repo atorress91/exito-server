@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import {
   LoginDto,
@@ -47,6 +48,7 @@ export class AuthService {
     private readonly countryRepository: Repository<Country>,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponse> {
@@ -515,6 +517,8 @@ export class AuthService {
     user: User,
     plainPassword: string,
   ): Promise<void> {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+
     const welcomeEmailHtml = getWelcomeEmailTemplate({
       name: user.name,
       lastName: user.lastName,
@@ -522,6 +526,7 @@ export class AuthService {
       phone: user.phone,
       password: plainPassword,
       verificationCode: user.verificationCode || '',
+      frontendUrl,
     });
 
     // Determinar la ruta del PDF

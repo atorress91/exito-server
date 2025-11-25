@@ -260,6 +260,7 @@ export class BrevoService {
     phone: string,
     password: string,
     verificationCode: string,
+    frontendUrl: string = 'http://localhost:3000',
   ): Promise<EmailResponse> {
     const params: WelcomeEmailData = {
       name,
@@ -268,6 +269,7 @@ export class BrevoService {
       phone,
       password,
       verificationCode,
+      frontendUrl,
     };
 
     const htmlContent = getWelcomeEmailTemplate(params);
