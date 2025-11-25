@@ -22,6 +22,8 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+ARG FRONTEND_URL=https://exitojuntos.com
+
 # Instalar solo dependencias de producción
 COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
@@ -45,6 +47,7 @@ EXPOSE 3000
 # Variables de entorno por defecto
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV FRONTEND_URL=${FRONTEND_URL}
 
 # Comando para iniciar la aplicación
 CMD ["node", "dist/main"]
