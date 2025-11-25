@@ -517,7 +517,10 @@ export class AuthService {
     user: User,
     plainPassword: string,
   ): Promise<void> {
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const frontendUrl = this.configService.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:3000',
+    );
 
     const welcomeEmailHtml = getWelcomeEmailTemplate({
       name: user.name,
