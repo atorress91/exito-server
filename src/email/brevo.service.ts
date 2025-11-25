@@ -9,7 +9,7 @@ import {
 } from './interfaces';
 import {
   getWelcomeEmailTemplate,
-  WelcomeEmailParams,
+  WelcomeEmailData,
 } from './templates/welcome-email.template';
 
 @Injectable()
@@ -259,13 +259,15 @@ export class BrevoService {
     email: string,
     phone: string,
     password: string,
+    verificationCode: string,
   ): Promise<EmailResponse> {
-    const params: WelcomeEmailParams = {
+    const params: WelcomeEmailData = {
       name,
       lastName,
       email,
       phone,
       password,
+      verificationCode,
     };
 
     const htmlContent = getWelcomeEmailTemplate(params);

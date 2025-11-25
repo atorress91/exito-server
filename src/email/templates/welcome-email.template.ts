@@ -19,8 +19,8 @@ export const getWelcomeEmailTemplate = (params: WelcomeEmailData): string => {
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4;">
     <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4;">
         <tr>
-            <td style="padding: 40px 20px;" text-align="center">
-                <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #000000; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <td style="padding: 40px 20px; text-align: center;">
+                <table role="presentation" style="width: 600px; max-width: 100%; margin: 0 auto; border-collapse: collapse; background-color: #000000; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                     
                     <!-- Header -->
                     <tr>
