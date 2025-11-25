@@ -66,6 +66,49 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Get('verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verificar email del usuario' })
+  @ApiQuery({
+    name: 'code',
+    required: true,
+    type: String,
+    description: 'Código de verificación enviado al email',
+    example: 'abc123def456ghi789',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Email verificado exitosamente',
+    schema: {
+      example: {
+        message: 'Cuenta activada exitosamente',
+        user: {
+          id: 1,
+          name: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          phone: '+573001234567',
+          status: true,
+          role: {
+            id: 2,
+            name: 'Client',
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Código de verificación inválido o expirado',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Esta cuenta ya ha sido verificada',
+  })
+  async verifyEmail(@Query('code') code: string) {
+    return this.authService.verifyEmail(code);
+  }
+
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Iniciar sesión' })

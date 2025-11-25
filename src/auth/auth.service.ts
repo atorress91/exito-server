@@ -129,7 +129,8 @@ export class AuthService {
       birtDate,
       father,
       role,
-      status: true,
+      status: false, // Inicia como false hasta que verifique el email
+      verificationCode: this.generateVerificationCode(),
       termsConditions: true,
       side: 0,
       ...(country && { country }),
@@ -460,6 +461,54 @@ export class AuthService {
   }
 
   /**
+   * Genera un código de verificación único
+   */
+  private generateVerificationCode(): string {
+    return (
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+    );
+  }
+
+  /**
+   * Verifica el email del usuario usando el código de verificación
+   */
+  async verifyEmail(
+    code: string,
+  ): Promise<{ message: string; user: Partial<User> }> {
+    // Buscar usuario por código de verificación
+    const user = await this.userRepository.findOne({
+      where: { verificationCode: code },
+      relations: ['role', 'country'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Código de verificación inválido o expirado');
+    }
+
+    // Verificar si ya está verificado
+    if (user.status) {
+      throw new ConflictException('Esta cuenta ya ha sido verificada');
+    }
+
+    // Activar la cuenta
+    user.status = true;
+    user.verificationCode = undefined; // Limpiar el código usado
+    await this.userRepository.save(user);
+
+    // Eliminar password del objeto de respuesta
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...userWithoutPassword } = user;
+
+    this.logger.log(`Usuario ${user.email} verificado exitosamente`);
+
+    return {
+      message: 'Cuenta activada exitosamente',
+      user: userWithoutPassword,
+    };
+  }
+
+  /**
    * Envía el email de bienvenida con PDF de forma asíncrona
    */
   private async sendWelcomeEmail(
@@ -472,6 +521,7 @@ export class AuthService {
       email: user.email,
       phone: user.phone,
       password: plainPassword,
+      verificationCode: user.verificationCode || '',
     });
 
     // Determinar la ruta del PDF

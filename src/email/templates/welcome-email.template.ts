@@ -1,12 +1,13 @@
-export interface WelcomeEmailParams {
+export interface WelcomeEmailData {
   name: string;
   lastName: string;
   email: string;
   phone: string;
   password: string;
+  verificationCode: string;
 }
 
-export const getWelcomeEmailTemplate = (params: WelcomeEmailParams): string => {
+export const getWelcomeEmailTemplate = (params: WelcomeEmailData): string => {
   return `
 <!DOCTYPE html>
 <html lang="es">
@@ -18,7 +19,7 @@ export const getWelcomeEmailTemplate = (params: WelcomeEmailParams): string => {
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4;">
     <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4;">
         <tr>
-            <td style="padding: 40px 20px;" align="center">
+            <td style="padding: 40px 20px;" text-align="center">
                 <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #000000; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                     
                     <!-- Header -->
@@ -47,62 +48,37 @@ export const getWelcomeEmailTemplate = (params: WelcomeEmailParams): string => {
                             <!-- Divider -->
                             <div style="height: 2px; background-color: #d4af37; margin: 30px 0;"></div>
                             
-                            <!-- Credentials Section -->
+                            <!-- Activation Section -->
                             <h2 style="margin: 30px 0 25px 0; color: #d4af37; font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-                                Tus credenciales de acceso
+                                Activa tu cuenta
                             </h2>
                             
-                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                            <p style="margin: 20px 0; color: #ffffff; font-size: 15px; line-height: 1.8;">
+                                Para comenzar a disfrutar de todos los beneficios de Éxito Juntos, necesitas activar tu cuenta haciendo clic en el botón de abajo:
+                            </p>
+                            
+                            <!-- CTA Button -->
+                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
                                 <tr>
-                                    <td style="padding: 15px 0; border-bottom: 1px solid #333333;">
-                                        <strong style="color: #ffffff; font-size: 14px; display: block; margin-bottom: 8px;">
-                                            Correo electrónico:
-                                        </strong>
-                                        <span style="color: #d4af37; font-size: 16px; font-weight: 600;">
-                                            ${params.email}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 15px 0; border-bottom: 1px solid #333333;">
-                                        <strong style="color: #ffffff; font-size: 14px; display: block; margin-bottom: 8px;">
-                                            Teléfono:
-                                        </strong>
-                                        <span style="color: #d4af37; font-size: 16px; font-weight: 600;">
-                                            ${params.phone}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 15px 0; border-bottom: 1px solid #333333;">
-                                        <strong style="color: #ffffff; font-size: 14px; display: block; margin-bottom: 8px;">
-                                            Contraseña temporal:
-                                        </strong>
-                                        <span style="color: #d4af37; font-size: 16px; font-weight: 600; font-family: 'Courier New', monospace;">
-                                            ${params.password}
-                                        </span>
+                                    <td style="text-align: center;">
+                                        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/verify?code=${params.verificationCode}" style="display: inline-block; background-color: #d4af37; color: #000000; text-decoration: none; padding: 18px 60px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 5px;">
+                                            ACTIVAR CUENTA
+                                        </a>
                                     </td>
                                 </tr>
                             </table>
                             
                             <!-- Important Notice -->
                             <p style="margin: 30px 0; padding: 20px; color: #ffffff; font-size: 14px; line-height: 1.6; border: 1px solid #d4af37; border-left: 4px solid #d4af37;">
-                                <strong style="color: #d4af37;">⚠️ Importante:</strong> Por tu seguridad, te recomendamos cambiar tu contraseña después de tu primer inicio de sesión.
+                                <strong style="color: #d4af37;">📱 Tus credenciales:</strong><br><br>
+                                <strong>Email:</strong> ${params.email}<br>
+                                <strong>Teléfono:</strong> ${params.phone}<br>
+                                <strong>Contraseña temporal:</strong> <span style="font-family: 'Courier New', monospace; color: #d4af37;">${params.password}</span><br><br>
+                                <em style="color: #999;">Por tu seguridad, te recomendamos cambiar tu contraseña después de activar tu cuenta.</em>
                             </p>
                             
                             <!-- Divider -->
                             <div style="height: 2px; background-color: #d4af37; margin: 30px 0;"></div>
-                            
-                            <!-- CTA Button -->
-                            <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
-                                <tr>
-                                    <td style="text-align: center;">
-                                        <a href="#" style="display: inline-block; background-color: #d4af37; color: #000000; text-decoration: none; padding: 18px 60px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-                                            INICIAR SESIÓN
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
                             
                             <p style="margin: 30px 0 0; color: #ffffff; font-size: 15px; line-height: 1.8;">
                                 Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos. Estamos aquí para apoyarte en cada paso del camino.

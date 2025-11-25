@@ -62,7 +62,7 @@ export class User {
   imageProfileUrl: string;
 
   @Column({ type: 'text', nullable: true })
-  verificationCode: string;
+  verificationCode?: string;
 
   @Column({ type: 'boolean', nullable: true })
   termsConditions: boolean;
