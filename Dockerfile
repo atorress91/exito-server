@@ -50,4 +50,4 @@ ENV PORT=3000
 ENV FRONTEND_URL=${FRONTEND_URL}
 
 # Comando para iniciar la aplicación
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
