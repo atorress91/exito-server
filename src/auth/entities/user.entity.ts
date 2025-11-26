@@ -64,6 +64,12 @@ export class User {
   @Column({ type: 'text', nullable: true })
   verificationCode?: string;
 
+  @Column({ type: 'text', nullable: true })
+  resetPasswordCode?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetPasswordExpires?: Date;
+
   @Column({ type: 'boolean', nullable: true })
   termsConditions: boolean;
 

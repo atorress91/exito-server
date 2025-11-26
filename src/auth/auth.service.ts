@@ -16,6 +16,8 @@ import {
   PaginationDto,
   GetUnilevelTreeDto,
   UpdateProfileDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
 } from './dto';
 import { AuthResponse, JwtPayload } from './interfaces/auth.interface';
 import * as path from 'node:path';
@@ -34,6 +36,7 @@ import { Role } from './entities/role.entity';
 import { Country } from './entities/country.entity';
 import { EmailAttachment, EmailService } from '../email';
 import { getWelcomeEmailTemplate } from '../email/templates/welcome-email.template';
+import { getPasswordResetEmailTemplate } from '../email/templates/password-reset-email.template';
 
 @Injectable()
 export class AuthService {
@@ -569,5 +572,122 @@ export class AuthService {
     });
 
     this.logger.log(`Email con PDF encolado correctamente para ${user.email}`);
+  }
+
+  /**
+   * Solicita el reseteo de contraseña enviando un código al email
+   */
+  async requestPasswordReset(
+    requestPasswordResetDto: RequestPasswordResetDto,
+  ): Promise<{ message: string }> {
+    const { email } = requestPasswordResetDto;
+
+    // Buscar usuario por email
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      // Por seguridad, devolvemos el mismo mensaje aunque el usuario no exista
+      return {
+        message:
+          'Si el email existe, recibirás un código para restablecer tu contraseña',
+      };
+    }
+
+    // Verificar que la cuenta esté activa
+    if (!user.status) {
+      throw new UnauthorizedException(
+        'Tu cuenta no está activa. Por favor verifica tu email primero',
+      );
+    }
+
+    // Generar código de reseteo (6 dígitos)
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Establecer expiración del código (1 hora)
+    const resetExpires = new Date();
+    resetExpires.setHours(resetExpires.getHours() + 1);
+
+    // Actualizar usuario con el código y la expiración
+    user.resetPasswordCode = resetCode;
+    user.resetPasswordExpires = resetExpires;
+    await this.userRepository.save(user);
+
+    // Enviar email con el código
+    await this.sendPasswordResetEmail(user, resetCode);
+
+    this.logger.log(`Código de reset enviado a ${user.email}`);
+
+    return {
+      message:
+        'Si el email existe, recibirás un código para restablecer tu contraseña',
+    };
+  }
+
+  /**
+   * Restablece la contraseña usando el código de seguridad
+   */
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    const { code, newPassword } = resetPasswordDto;
+
+    // Buscar usuario por código de reseteo
+    const user = await this.userRepository.findOne({
+      where: { resetPasswordCode: code },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Código de seguridad inválido o expirado');
+    }
+
+    // Verificar que el código no haya expirado
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      throw new UnauthorizedException('El código de seguridad ha expirado');
+    }
+
+    // Hash de la nueva contraseña
+    // Actualizar la contraseña y limpiar el código de reseteo
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordCode = undefined;
+    user.resetPasswordExpires = undefined;
+    await this.userRepository.save(user);
+
+    this.logger.log(`Contraseña restablecida para ${user.email}`);
+
+    return {
+      message: 'Contraseña restablecida exitosamente',
+    };
+  }
+
+  /**
+   * Envía el email de reseteo de contraseña
+   */
+  private async sendPasswordResetEmail(
+    user: User,
+    resetCode: string,
+  ): Promise<void> {
+    const frontendUrl = this.configService.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:3000',
+    );
+
+    const passwordResetEmailHtml = getPasswordResetEmailTemplate({
+      name: user.name,
+      lastName: user.lastName,
+      email: user.email,
+      resetCode,
+      frontendUrl,
+    });
+
+    // Encolar el email
+    await this.emailService.queueEmail({
+      to: [{ email: user.email, name: `${user.name} ${user.lastName}` }],
+      subject: 'Restablecer Contraseña - Éxito Juntos',
+      htmlContent: passwordResetEmailHtml,
+    });
+
+    this.logger.log(`Email de reset de contraseña encolado para ${user.email}`);
   }
 }

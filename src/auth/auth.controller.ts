@@ -25,6 +25,8 @@ import {
   PaginationDto,
   GetUnilevelTreeDto,
   UpdateProfileDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
 } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -154,6 +156,63 @@ export class AuthController {
   })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('request-password-reset')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Solicitar código para restablecer contraseña',
+    description:
+      'Envía un código de seguridad al email del usuario para restablecer su contraseña. El código expira en 1 hora.',
+  })
+  @ApiBody({ type: RequestPasswordResetDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Código de reseteo enviado al email (si existe en el sistema)',
+    schema: {
+      example: {
+        message:
+          'Si el email existe, recibirás un código para restablecer tu contraseña',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Cuenta no activa',
+  })
+  async requestPasswordReset(
+    @Body() requestPasswordResetDto: RequestPasswordResetDto,
+  ) {
+    return this.authService.requestPasswordReset(requestPasswordResetDto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Restablecer contraseña con código de seguridad',
+    description:
+      'Restablece la contraseña del usuario utilizando el código de seguridad recibido por email.',
+  })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña restablecida exitosamente',
+    schema: {
+      example: {
+        message: 'Contraseña restablecida exitosamente',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Código expirado',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Código inválido',
+  })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 
   @Get('profile')
