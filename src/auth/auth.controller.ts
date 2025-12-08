@@ -23,7 +23,6 @@ import {
   LoginDto,
   RegisterDto,
   PaginationDto,
-  GetUnilevelTreeDto,
   UpdateProfileDto,
   RequestPasswordResetDto,
   ResetPasswordDto,
@@ -410,9 +409,10 @@ export class AuthController {
   })
   getUnilevelTree(
     @GetUser() user: { id: string; phone: string; role: string },
-    @Query() unilevelTreeDto: GetUnilevelTreeDto,
+    @Query('userId') userId?: number,
+    @Query('maxLevel') maxLevel?: number,
   ) {
-    return this.authService.getUnilevelTree(user, unilevelTreeDto);
+    return this.authService.getUnilevelTree(user, { userId, maxLevel });
   }
 
   @Get('personal-network')

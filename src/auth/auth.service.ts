@@ -348,18 +348,26 @@ export class AuthService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // Verificar si el usuario es admin comparando por ID del rol
-    // Admin tiene role_id = 1, Client tiene role_id = 2
-    const isAdmin = user.role?.id === 1;
+    // Log para debug del rol
+    this.logger.log(
+      `Usuario encontrado - roleId: ${user.role?.id}, roleIdType: ${typeof user.role?.id}, roleName: ${user.role?.name}`,
+    );
+
+    const roleId = Number(user.role?.id);
+    const isAdmin =
+      roleId === 1 ||
+      user.role?.name?.toLowerCase() === 'admin' ||
+      user.role?.name === 'Admin';
+
+    this.logger.log(`roleId convertido: ${roleId}, isAdmin: ${isAdmin}`);
 
     // Si no es admin, solo puede ver su propio árbol
+    // Si es admin y se proporciona userId, usar ese userId
     const targetUserId =
       isAdmin && userId ? userId : Number.parseInt(requestingUser.id);
 
     // Ejecutar el stored procedure
-    const query = `
-      SELECT * FROM get_unilevel_family_tree($1, $2, $3)
-    `;
+    const query = `SELECT * FROM get_unilevel_family_tree($1, $2, $3)`;
 
     const tree: UnilevelTreeNode[] = await this.userRepository.query(query, [
       targetUserId,
